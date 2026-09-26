@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *.sqlite3
+Arquivos/
 venv/
 .venv/
 .env
