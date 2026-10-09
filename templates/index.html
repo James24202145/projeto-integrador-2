@@ -3,15 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CicloPonto - Mapeamento e Segurança para Cilistas</title>
+    <title>Ecomapa - Pontos de Apoio para Ciclistas</title>
+
+    <!-- CSS do Leaflet -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    />
+
+    <!-- CSS do Projeto -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
+
     <header>
-        <h1>CicloPonto</h1>
-        <p>Plataforma colaborativa de mapeamento, bicicletários e segurança para ciclistas.</p>
+        <h1>🚴‍♂️ Ecomapa</h1>
+        <p>Mapa Interativo de Pontos de Apoio e Infraestrutura Cicloviária</p>
     </header>
-    <main>
-        <p>Servidor Flask rodando com sucesso!</p>
-    </main>
+
+    <div id="map"></div>
+
+    <!-- JS do Leaflet -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin="">
+    </script>
+
+    <!-- JS do Projeto -->
+    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>
-</html><!DOCTYPE html>
+</html>
