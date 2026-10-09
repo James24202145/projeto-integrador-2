@@ -3,36 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ecomapa - Pontos de Apoio para Ciclistas</title>
+    <title>Ecomapa - Infraestrutura e Pontos de Apoio Cicloviários</title>
 
-    <!-- CSS do Leaflet -->
+    <!-- Leaflet CSS -->
     <link
         rel="stylesheet"
         href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
         crossorigin=""
     />
-
-    <!-- CSS do Projeto -->
+    <!-- FontAwesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Style CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-    <header>
-        <h1>🚴‍♂️ Ecomapa</h1>
-        <p>Mapa Interativo de Pontos de Apoio e Infraestrutura Cicloviária</p>
-    </header>
-
+    <!-- Container Principal do Mapa -->
     <div id="map"></div>
 
-    <!-- JS do Leaflet -->
+    <!-- Painel Lateral Flutuante (Estilo Ciclomapa) -->
+    <aside class="sidebar">
+        <div class="brand">
+            <h2><i class="fa-solid fa-bicycle"></i> Ecomapa</h2>
+            <p>Pontos de apoio cicloviários em SP</p>
+        </div>
+
+        <!-- Campo de Busca -->
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="search-input" placeholder="Buscar por nome ou endereço...">
+        </div>
+
+        <!-- Seção de Filtros -->
+        <div class="filter-section">
+            <h3>Filtros</h3>
+
+            <div class="filter-group">
+                <label for="filter-tipo">Tipo de Ponto:</label>
+                <select id="filter-tipo">
+                    <option value="todos">Todos os tipos</option>
+                    <option value="Bicicletário">Bicicletário</option>
+                    <option value="Paraciclo">Paraciclo</option>
+                    <option value="Oficina / Suporte">Oficina / Suporte</option>
+                </select>
+            </div>
+
+            <div class="filter-checkboxes">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="filter-gratuito"> Apenas Gratuitos
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="filter-coberto"> Apenas Cobertos
+                </label>
+            </div>
+        </div>
+
+        <!-- Contador de Resultados -->
+        <div class="results-count">
+            <span id="ponto-count">0</span> pontos encontrados
+        </div>
+    </aside>
+
+    <!-- Leaflet JS -->
     <script
         src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin="">
     </script>
-
-    <!-- JS do Projeto -->
+    <!-- Map JS -->
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>
 </html>
