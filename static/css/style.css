@@ -12,44 +12,49 @@ body, html {
 }
 
 #map {
-    width: 100%;
+    width: 100vw;
     height: 100vh;
     z-index: 1;
 }
 
-/* Sidebar Flutuante */
+/* Painel Flutuante Lateral */
 .sidebar {
     position: absolute;
     top: 20px;
     left: 20px;
-    width: 340px;
-    max-height: calc(100vh - 40px);
+    width: 320px;
     background: #ffffff;
     border-radius: 12px;
+    padding: 20px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     z-index: 1000;
-    padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    overflow-y: auto;
 }
 
-.brand h2 {
-    color: #1b5e20;
-    font-size: 1.4rem;
+.brand {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+}
+
+.brand-icon {
+    font-size: 28px;
+    color: #2e7d32;
+}
+
+.brand h1 {
+    font-size: 20px;
+    color: #2e7d32;
+    font-weight: 700;
 }
 
 .brand p {
+    font-size: 12px;
     color: #666;
-    font-size: 0.85rem;
-    margin-top: 2px;
 }
 
-/* Caixa de Busca */
 .search-box {
     position: relative;
     display: flex;
@@ -60,70 +65,177 @@ body, html {
     position: absolute;
     left: 12px;
     color: #888;
+    font-size: 14px;
 }
 
 .search-box input {
     width: 100%;
     padding: 10px 10px 10px 36px;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     border-radius: 8px;
-    font-size: 0.9rem;
+    font-size: 14px;
     outline: none;
-    transition: border-color 0.2s;
 }
 
-.search-box input:focus {
-    border-color: #2e7d32;
-}
-
-/* Filtros */
-.filter-section h3 {
-    font-size: 0.95rem;
-    color: #333;
-    margin-bottom: 8px;
-}
-
-.filter-group select {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    outline: none;
-    margin-bottom: 10px;
-    background: #fff;
-}
-
-.filter-checkboxes {
+.filter-section {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
-.checkbox-label {
-    font-size: 0.85rem;
-    color: #444;
+.filter-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+}
+
+.form-group label {
+    font-size: 12px;
+    color: #555;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.checkbox-group {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    color: #444;
 }
 
-.results-count {
-    font-size: 0.8rem;
-    color: #777;
+.counter {
+    font-size: 13px;
+    color: #666;
     border-top: 1px solid #eee;
     padding-top: 10px;
 }
 
-/* Ajuste Responsivo para Celulares */
-@media (max-width: 480px) {
-    .sidebar {
-        top: auto;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        max-height: 45vh;
-        border-radius: 16px 16px 0 0;
-    }
+/* ==========================================
+   ESTILIZAÇÃO DOS PINS CUSTOMIZADOS NO MAPA
+   ========================================== */
+
+/* Remove a caixa branca padrão que o Leaflet coloca no DivIcon */
+.custom-pin-wrapper {
+    background: transparent !important;
+    border: none !important;
+}
+
+/* Formato em gota/pin */
+.custom-pin {
+    width: 34px;
+    height: 34px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+    border: 2px solid #ffffff;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.custom-pin:hover {
+    transform: rotate(-45deg) scale(1.15);
+}
+
+/* Ícone dentro do pin (desfaz a rotação) */
+.custom-pin i {
+    transform: rotate(45deg);
+    color: #ffffff;
+    font-size: 15px;
+}
+
+/* Cores por Tipo de Equipamento */
+.pin-bicicletario {
+    background-color: #2e7d32 !important; /* Verde */
+}
+
+.pin-paraciclo {
+    background-color: #0288d1 !important; /* Azul */
+}
+
+.pin-oficina {
+    background-color: #e65100 !important; /* Laranja */
+}
+
+.pin-padrao {
+    background-color: #616161 !important; /* Cinza */
+}
+
+/* Estilo do Popup */
+.popup-content {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.popup-content h3 {
+    color: #2e7d32;
+    margin-bottom: 6px;
+    font-size: 15px;
+}
+
+.popup-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+/* ... (final do style.css existente) */
+
+/* ==========================================
+   ESTILIZAÇÃO DA LEGENDA NO MENU
+   ========================================== */
+
+.legend-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+}
+
+.legend-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: #555;
+}
+
+/* Ajuste específico para os pins dentro da legenda */
+.legend-pin-fix {
+    width: 24px !important;  /* Um pouco menores na legenda */
+    height: 24px !important;
+    transform: none !important; /* Remove a rotação de gota */
+    border-radius: 6px !important; /* Formato quadrado arredondado */
+    border: none !important;
+    box-shadow: none !important;
+    position: relative !important;
+    pointer-events: none; /* Não interativo */
+}
+
+/* Ajuste do ícone dentro do pin da legenda (remove rotação) */
+.legend-pin-fix i {
+    transform: none !important;
+    font-size: 12px !important;
 }

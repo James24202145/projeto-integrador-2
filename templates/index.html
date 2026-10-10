@@ -3,45 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ecomapa - Infraestrutura e Pontos de Apoio Cicloviários</title>
+    <title>Ecomapa - Pontos de Apoio Cicloviário</title>
 
     <!-- Leaflet CSS -->
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossorigin=""
-    />
-    <!-- FontAwesome para ícones -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Style CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Font Awesome (Ícones) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
 
-    <!-- Container Principal do Mapa -->
-    <div id="map"></div>
-
-    <!-- Painel Lateral Flutuante (Estilo Ciclomapa) -->
-    <aside class="sidebar">
+    <!-- Painel Lateral Flutuante -->
+    <div class="sidebar">
         <div class="brand">
-            <h2><i class="fa-solid fa-bicycle"></i> Ecomapa</h2>
-            <p>Pontos de apoio cicloviários em SP</p>
+            <i class="fa-solid fa-bicycle brand-icon"></i>
+            <div>
+                <h1>Ecomapa</h1>
+                <p>Pontos de apoio cicloviários em SP</p>
+            </div>
         </div>
 
-        <!-- Campo de Busca -->
         <div class="search-box">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="search-input" placeholder="Buscar por nome ou endereço...">
+            <input type="text" id="input-busca" placeholder="Buscar por nome ou endereço...">
         </div>
 
-        <!-- Seção de Filtros -->
         <div class="filter-section">
-            <h3>Filtros</h3>
+            <label class="filter-title">Filtros</label>
 
-            <div class="filter-group">
-                <label for="filter-tipo">Tipo de Ponto:</label>
-                <select id="filter-tipo">
+            <div class="form-group">
+                <label for="select-tipo">Tipo de Ponto:</label>
+                <select id="select-tipo">
                     <option value="todos">Todos os tipos</option>
                     <option value="Bicicletário">Bicicletário</option>
                     <option value="Paraciclo">Paraciclo</option>
@@ -49,29 +44,54 @@
                 </select>
             </div>
 
-            <div class="filter-checkboxes">
-                <label class="checkbox-label">
-                    <input type="checkbox" id="filter-gratuito"> Apenas Gratuitos
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" id="filter-coberto"> Apenas Cobertos
-                </label>
+
+
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="check-gratuito"> Apenas Gratuitos</label>
+                <label><input type="checkbox" id="check-coberto"> Apenas Cobertos</label>
             </div>
         </div>
 
-        <!-- Contador de Resultados -->
-        <div class="results-count">
-            <span id="ponto-count">0</span> pontos encontrados
+
+        <!-- NOVA SEÇÃO DE LEGENDA ADICIONADA AQUI -->
+        <div class="legend-section">
+            <label class="filter-title">Legenda</label>
+            <div class="legend-container">
+                <div class="legend-item">
+                    <!-- Pin Verde com Bicicleta -->
+                    <div class="custom-pin pin-bicicletario legend-pin-fix">
+                        <i class="fa-solid fa-bicycle"></i>
+                    </div>
+                    <span>Bicicletário</span>
+                </div>
+                <div class="legend-item">
+                    <!-- Pin Azul com "P" -->
+                    <div class="custom-pin pin-paraciclo legend-pin-fix">
+                        <i class="fa-solid fa-square-parking"></i>
+                    </div>
+                    <span>Paraciclo</span>
+                </div>
+                <div class="legend-item">
+                    <!-- Pin Laranja com Ferramenta -->
+                    <div class="custom-pin pin-oficina legend-pin-fix">
+                        <i class="fa-solid fa-wrench"></i>
+                    </div>
+                    <span>Oficina / Suporte</span>
+                </div>
+            </div>
         </div>
-    </aside>
+        <div class="counter">
+            <span id="total-pontos">0</span> pontos encontrados
+        </div>
+    </div>
+
+    <!-- Container do Mapa -->
+    <div id="map"></div>
 
     <!-- Leaflet JS -->
-    <script
-        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin="">
-    </script>
-    <!-- Map JS -->
-    <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- JavaScript Principal -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
