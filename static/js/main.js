@@ -1,4 +1,4 @@
-// Funções globais para o Modal de Ocorrências
+// Funções globais para os Modais de Ocorrências
 function abrirModalOcorrencia(idPonto) {
     document.getElementById('ocorrencia-ponto-id').value = idPonto;
     document.getElementById('modal-ocorrencia').style.display = 'flex';
@@ -9,6 +9,17 @@ function fecharModalOcorrencia() {
     document.getElementById('form-ocorrencia').reset();
     const contador = document.getElementById('contador-caracteres');
     if (contador) contador.textContent = '0/1000';
+}
+
+function abrirModalDetalhe(tipo, data, descricao) {
+    document.getElementById('detalhe-tipo').textContent = tipo;
+    document.getElementById('detalhe-data').textContent = data;
+    document.getElementById('detalhe-descricao').textContent = descricao;
+    document.getElementById('modal-detalhe-ocorrencia').style.display = 'flex';
+}
+
+function fecharModalDetalhe() {
+    document.getElementById('modal-detalhe-ocorrencia').style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,7 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const icone = obterIconePersonalizado(ponto.tipo);
             const marker = L.marker([ponto.latitude, ponto.longitude], { icon: icone });
 
-            // Identificador correto do ponto (compatível com id ou id_ponto)
             const idPonto = ponto.id_ponto || ponto.id;
 
             const popupHtml = `
@@ -67,6 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><i class="fa-solid fa-layer-group"></i> <strong>Vagas:</strong> ${ponto.capacidade_vagas || 'N/I'}</p>
                     <p><i class="fa-solid fa-shield-halved"></i> <strong>Coberto:</strong> ${ponto.coberto ? 'Sim' : 'Não'}</p>
                     <p><i class="fa-solid fa-tag"></i> <strong>Gratuito:</strong> ${ponto.gratuito ? 'Sim' : 'Não'}</p>
+                    
+                    <div class="popup-ocorrencias-container">
+                        <h4>Últimas Ocorrências</h4>
+                        <div id="lista-oc-${idPonto}" class="lista-ocorrencias-popup">
+                            <span class="sem-ocorrencias">A carregar...</span>
+                        </div>
+                    </div>
+
                     <button class="btn-ocorrencia" onclick="abrirModalOcorrencia(${idPonto})">
                         <i class="fa-solid fa-triangle-exclamation"></i> Registar Ocorrência
                     </button>
@@ -74,10 +92,44 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
 
             marker.bindPopup(popupHtml);
+
+            // Carrega dinamicamente as ocorrências quando o popup abre
+            marker.on('popupopen', () => {
+                fetch(`/api/pontos/${idPonto}/ocorrencias`)
+                    .then(res => res.json())
+                    .then(ocorrencias => {
+                        const container = document.getElementById(`lista-oc-${idPonto}`);
+                        if (!container) return;
+
+                        if (ocorrencias.length === 0) {
+                            container.innerHTML = '<span class="sem-ocorrencias">Sem ocorrências registadas.</span>';
+                            return;
+                        }
+
+                        let htmlOcorrencias = '';
+                        ocorrencias.forEach(oc => {
+                            const tipoEscapado = oc.tipo.replace(/'/g, "\\'");
+                            const dataEscapada = oc.data_relato.replace(/'/g, "\\'");
+                            const descEscapada = (oc.descricao || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
+
+                            htmlOcorrencias += `
+                                <div class="item-ocorrencia-popup" onclick="abrirModalDetalhe('${tipoEscapado}', '${dataEscapada}', '${descEscapada}')">
+                                    <span class="tipo"><i class="fa-solid fa-circle-exclamation"></i> ${oc.tipo}</span>
+                                    <span class="data">${oc.data_relato}</span>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = htmlOcorrencias;
+                    })
+                    .catch(err => {
+                        const container = document.getElementById(`lista-oc-${idPonto}`);
+                        if (container) container.innerHTML = '<span class="sem-ocorrencias">Erro ao carregar.</span>';
+                    });
+            });
+
             camadaMarcadores.addLayer(marker);
         });
 
-        // Atualiza o contador na interface
         document.getElementById('total-pontos').textContent = pontos.length;
     }
 

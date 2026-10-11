@@ -44,35 +44,29 @@
                 </select>
             </div>
 
-
-
             <div class="checkbox-group">
                 <label><input type="checkbox" id="check-gratuito"> Apenas Gratuitos</label>
                 <label><input type="checkbox" id="check-coberto"> Apenas Cobertos</label>
             </div>
         </div>
 
-
-        <!-- NOVA SEÇÃO DE LEGENDA ADICIONADA AQUI -->
+        <!-- Seção de Legenda -->
         <div class="legend-section">
             <label class="filter-title">Legenda</label>
             <div class="legend-container">
                 <div class="legend-item">
-                    <!-- Pin Verde com Bicicleta -->
                     <div class="custom-pin pin-bicicletario legend-pin-fix">
                         <i class="fa-solid fa-bicycle"></i>
                     </div>
                     <span>Bicicletário</span>
                 </div>
                 <div class="legend-item">
-                    <!-- Pin Azul com "P" -->
                     <div class="custom-pin pin-paraciclo legend-pin-fix">
                         <i class="fa-solid fa-square-parking"></i>
                     </div>
                     <span>Paraciclo</span>
                 </div>
                 <div class="legend-item">
-                    <!-- Pin Laranja com Ferramenta -->
                     <div class="custom-pin pin-oficina legend-pin-fix">
                         <i class="fa-solid fa-wrench"></i>
                     </div>
@@ -118,9 +112,24 @@
                     <textarea id="ocorrencia-descricao" rows="4" maxlength="1000" required placeholder="Descreva o problema ou situação..."></textarea>
                     <div id="contador-caracteres" style="font-size: 11px; color: #666; text-align: right; margin-top: 2px;">0/1000</div>
                 </div>
+
                 <button type="submit" class="btn-salvar">Guardar Ocorrência</button>
             </form>
         </div>
     </div>
+
+    <!-- Modal para Exibir Detalhes da Ocorrência -->
+    <div id="modal-detalhe-ocorrencia" class="modal" style="display: none;">
+        <div class="modal-conteudo">
+            <span class="fechar-modal" onclick="fecharModalDetalhe()">&times;</span>
+            <h2 id="detalhe-tipo" style="color: #d32f2f; margin-bottom: 4px;">Tipo de Ocorrência</h2>
+            <p style="font-size: 12px; color: #666; margin-bottom: 12px;"><i class="fa-regular fa-clock"></i> <span id="detalhe-data"></span></p>
+            <div class="form-grupo">
+                <label>Descrição:</label>
+                <p id="detalhe-descricao" style="background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #ddd; max-height: 150px; overflow-y: auto; font-size: 14px; color: #333; word-break: break-word;"></p>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

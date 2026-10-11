@@ -5,9 +5,6 @@ from db import get_db_connection
 app = Flask(__name__)
 
 
-# app.config['JSON_AS_ASCII'] = False
-
-
 # Rota da página web (Front-end com Leaflet.js)
 @app.route('/')
 def index():
@@ -51,6 +48,43 @@ def get_pontos():
             ponto['longitude'] = float(ponto['longitude'])
 
         return jsonify(pontos), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+# Rota da API REST para listar ocorrências de um ponto específico
+@app.route('/api/pontos/<int:id_ponto>/ocorrencias', methods=['GET'])
+def get_ocorrencias_ponto(id_ponto):
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'error': 'Erro ao conectar ao banco de dados'}), 500
+
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT id_ocorrencia, tipo, descricao, data_relato 
+            FROM ocorrencia 
+            WHERE id_ponto = %s 
+            ORDER BY data_relato DESC 
+            LIMIT 5;
+        """
+        cursor.execute(query, (id_ponto,))
+        ocorrencias = cursor.fetchall()
+
+        for oc in ocorrencias:
+            if oc.get('data_relato'):
+                oc['data_relato'] = oc['data_relato'].strftime('%d/%m/%Y %H:%M')
+
+        return jsonify(ocorrencias), 200
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
