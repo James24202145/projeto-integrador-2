@@ -93,5 +93,34 @@
 
     <!-- JavaScript Principal -->
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Modal para Registar Ocorrência -->
+    <div id="modal-ocorrencia" class="modal" style="display: none;">
+        <div class="modal-conteudo">
+            <span class="fechar-modal" onclick="fecharModalOcorrencia()">&times;</span>
+            <h2>Registar Ocorrência</h2>
+            <form id="form-ocorrencia">
+                <input type="hidden" id="ocorrencia-ponto-id">
+
+                <div class="form-grupo">
+                    <label for="ocorrencia-tipo">Tipo de Ocorrência:</label>
+                    <select id="ocorrencia-tipo">
+                        <option value="Vandalismo">Vandalismo</option>
+                        <option value="Avaria/Estrutura Danificada">Avaria/Estrutura Danificada</option>
+                        <option value="Ponto de Apoio Lotado">Ponto de Apoio Lotado</option>
+                        <option value="Ocorrência de Furto/Roubo">Ocorrência de Furto/Roubo</option>
+                        <option value="Ponto de Apoio Fechado">Ponto de Apoio Fechado</option>
+                    </select>
+                </div>
+
+                <div class="form-grupo">
+                    <label for="ocorrencia-descricao">Descrição:</label>
+                    <textarea id="ocorrencia-descricao" rows="4" maxlength="1000" required placeholder="Descreva o problema ou situação..."></textarea>
+                    <div id="contador-caracteres" style="font-size: 11px; color: #666; text-align: right; margin-top: 2px;">0/1000</div>
+                </div>
+                <button type="submit" class="btn-salvar">Guardar Ocorrência</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

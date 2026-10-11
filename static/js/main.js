@@ -1,3 +1,16 @@
+// Funções globais para o Modal de Ocorrências
+function abrirModalOcorrencia(idPonto) {
+    document.getElementById('ocorrencia-ponto-id').value = idPonto;
+    document.getElementById('modal-ocorrencia').style.display = 'flex';
+}
+
+function fecharModalOcorrencia() {
+    document.getElementById('modal-ocorrencia').style.display = 'none';
+    document.getElementById('form-ocorrencia').reset();
+    const contador = document.getElementById('contador-caracteres');
+    if (contador) contador.textContent = '0/1000';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Inicializa o mapa Leaflet
     const map = L.map('map').setView([-23.55052, -46.633309], 12);
@@ -43,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const icone = obterIconePersonalizado(ponto.tipo);
             const marker = L.marker([ponto.latitude, ponto.longitude], { icon: icone });
 
+            // Identificador correto do ponto (compatível com id ou id_ponto)
+            const idPonto = ponto.id_ponto || ponto.id;
+
             const popupHtml = `
                 <div class="popup-content">
                     <span class="popup-tag">${ponto.tipo}</span>
@@ -51,6 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p><i class="fa-solid fa-layer-group"></i> <strong>Vagas:</strong> ${ponto.capacidade_vagas || 'N/I'}</p>
                     <p><i class="fa-solid fa-shield-halved"></i> <strong>Coberto:</strong> ${ponto.coberto ? 'Sim' : 'Não'}</p>
                     <p><i class="fa-solid fa-tag"></i> <strong>Gratuito:</strong> ${ponto.gratuito ? 'Sim' : 'Não'}</p>
+                    <button class="btn-ocorrencia" onclick="abrirModalOcorrencia(${idPonto})">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Registar Ocorrência
+                    </button>
                 </div>
             `;
 
@@ -89,7 +108,46 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('check-gratuito').addEventListener('change', aplicarFiltros);
     document.getElementById('check-coberto').addEventListener('change', aplicarFiltros);
 
-    // 5. Carrega os pontos do Backend Flask
+    // 5. Contador de caracteres para a descrição da ocorrência
+    const textareaDescricao = document.getElementById('ocorrencia-descricao');
+    const contadorCaracteres = document.getElementById('contador-caracteres');
+
+    if (textareaDescricao && contadorCaracteres) {
+        textareaDescricao.addEventListener('input', () => {
+            const atual = textareaDescricao.value.length;
+            const max = textareaDescricao.getAttribute('maxlength') || 1000;
+            contadorCaracteres.textContent = `${atual}/${max}`;
+        });
+    }
+
+    // 6. Manipulação do envio do formulário de ocorrências via AJAX
+    const formOcorrencia = document.getElementById('form-ocorrencia');
+    if (formOcorrencia) {
+        formOcorrencia.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const idPonto = document.getElementById('ocorrencia-ponto-id').value;
+            const descricao = document.getElementById('ocorrencia-descricao').value;
+            const tipo = document.getElementById('ocorrencia-tipo').value;
+
+            fetch('/api/ocorrencias', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_ponto: idPonto, descricao: descricao, tipo: tipo })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.sucesso) {
+                    alert('Ocorrência registada com sucesso!');
+                    fecharModalOcorrencia();
+                } else {
+                    alert('Erro ao registar: ' + data.mensagem);
+                }
+            })
+            .catch(err => console.error('Erro na requisição:', err));
+        });
+    }
+
+    // 7. Carrega os pontos do Backend Flask
     fetch('/api/pontos')
         .then(res => res.json())
         .then(dados => {
