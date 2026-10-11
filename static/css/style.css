@@ -376,3 +376,12 @@ body, html {
 .btn-salvar:hover {
     background-color: #1b5e20;
 }
+
+/* Pins com Alerta de Ocorrências */
+.pin-alerta-amarelo {
+    background-color: #fbc02d !important; /* Amarelo / Laranja alerta */
+}
+
+.pin-alerta-vermelho {
+    background-color: #d32f2f !important; /* Vermelho crítico */
+}

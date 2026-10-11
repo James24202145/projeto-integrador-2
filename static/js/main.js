@@ -34,8 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const camadaMarcadores = L.layerGroup().addTo(map);
     let todosPontos = [];
 
-    // 2. Função para criar o ícone L.divIcon
-    function obterIconePersonalizado(tipo) {
+    // 2. Função para criar o ícone L.divIcon com base no tipo e na última ocorrência
+    function obterIconePersonalizado(tipo, ultimaOcorrencia) {
         let classeCor = 'pin-padrao';
         let iconeFa = 'fa-parking';
 
@@ -48,6 +48,22 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (tipo === 'Oficina / Suporte') {
             classeCor = 'pin-oficina';
             iconeFa = 'fa-wrench';
+        }
+
+        // Regra de cores de alerta para os pins
+        if (ultimaOcorrencia) {
+            if (
+                ultimaOcorrencia === 'Ponto de Apoio Fechado' ||
+                ultimaOcorrencia === 'Ponto de Apoio Lotado'
+            ) {
+                classeCor = 'pin-alerta-vermelho';
+            } else if (
+                ultimaOcorrencia === 'Vandalismo' ||
+                ultimaOcorrencia === 'Avaria/Estrutura Danificada' ||
+                ultimaOcorrencia === 'Ocorrência de Furto/Roubo'
+            ) {
+                classeCor = 'pin-alerta-amarelo';
+            }
         }
 
         return L.divIcon({
@@ -64,7 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
         camadaMarcadores.clearLayers();
 
         pontos.forEach(ponto => {
-            const icone = obterIconePersonalizado(ponto.tipo);
+            // Passa a última ocorrência do ponto para definir a cor correspondente do pin
+            const icone = obterIconePersonalizado(ponto.tipo, ponto.ultima_ocorrencia_tipo);
             const marker = L.marker([ponto.latitude, ponto.longitude], { icon: icone });
 
             const idPonto = ponto.id_ponto || ponto.id;
@@ -123,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     })
                     .catch(err => {
                         const container = document.getElementById(`lista-oc-${idPonto}`);
-                        // Se houver falha de rede real, avisa subtilmente, ou se preferir, pode ocultar
                         if (container) container.innerHTML = '<span class="sem-ocorrencias">Não há ocorrências.</span>';
                     });
             });
@@ -192,6 +208,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.sucesso) {
                     alert('Ocorrência registada com sucesso!');
                     fecharModalOcorrencia();
+
+                    // RECARREGA OS PONTOS DO MAPA AUTOMATICAMENTE
+                    fetch('/api/pontos')
+                        .then(res => res.json())
+                        .then(dados => {
+                            todosPontos = dados;
+                            renderizarPontos(todosPontos);
+                        })
+                        .catch(err => console.error('Erro ao recarregar pontos:', err));
+
                 } else {
                     alert('Erro ao registar: ' + data.mensagem);
                 }
@@ -199,7 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.error('Erro na requisição:', err));
         });
     }
-
     // 7. Carrega os pontos do Backend Flask
     fetch('/api/pontos')
         .then(res => res.json())

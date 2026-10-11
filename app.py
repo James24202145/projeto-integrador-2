@@ -23,6 +23,7 @@ def get_pontos():
 
         cursor = conn.cursor(dictionary=True)
 
+        # Atualizado para trazer o tipo de ocorrência mais severa ou recente associada
         query = """
             SELECT 
                 p.id_ponto,
@@ -35,7 +36,14 @@ def get_pontos():
                 p.gratuito,
                 p.coberto,
                 p.status_operacional,
-                o.nome AS operador
+                o.nome AS operador,
+                (
+                    SELECT oc.tipo 
+                    FROM ocorrencia oc 
+                    WHERE oc.id_ponto = p.id_ponto 
+                    ORDER BY oc.data_relato DESC 
+                    LIMIT 1
+                ) AS ultima_ocorrencia_tipo
             FROM ponto_apoio p
             LEFT JOIN operador o ON p.id_operador = o.id_operador
             WHERE p.status_operacional = 'Ativo';
@@ -57,6 +65,7 @@ def get_pontos():
             cursor.close()
         if conn:
             conn.close()
+
 
 
 # Rota da API REST para listar ocorrências de um ponto específico
