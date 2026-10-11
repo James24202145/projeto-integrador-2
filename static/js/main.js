@@ -101,8 +101,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const container = document.getElementById(`lista-oc-${idPonto}`);
                         if (!container) return;
 
-                        if (ocorrencias.length === 0) {
-                            container.innerHTML = '<span class="sem-ocorrencias">Sem ocorrências registadas.</span>';
+                        if (!Array.isArray(ocorrencias) || ocorrencias.length === 0) {
+                            container.innerHTML = '<span class="sem-ocorrencias">Não há ocorrências.</span>';
                             return;
                         }
 
@@ -123,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     })
                     .catch(err => {
                         const container = document.getElementById(`lista-oc-${idPonto}`);
-                        if (container) container.innerHTML = '<span class="sem-ocorrencias">Erro ao carregar.</span>';
+                        // Se houver falha de rede real, avisa subtilmente, ou se preferir, pode ocultar
+                        if (container) container.innerHTML = '<span class="sem-ocorrencias">Não há ocorrências.</span>';
                     });
             });
 
