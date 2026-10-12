@@ -216,7 +216,8 @@ document.addEventListener('DOMContentLoaded', () => {
             : "Clique no mapa para inserir a localização do novo ponto de apoio.";
     }
 
-    // Clique no mapa recolhe coordenadas e ativa o botão de prosseguir
+
+    // Clique no mapa recolhe coordenadas e ativa o botão de prosseguir (sem fechar a janela)
     map.on('click', function(e) {
         if (latInput && lngInput && btnProximo) {
             latInput.value = e.latlng.lat.toFixed(6);
@@ -226,11 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btnProximo.style.backgroundColor = '#2e7d32';
             btnProximo.style.cursor = 'pointer';
             btnProximo.style.opacity = '1';
-
-            if (window.innerWidth <= 768 && sidebar) {
-                sidebar.classList.add('mobile-hidden');
-                if (toggleBtn) toggleBtn.style.display = 'flex';
-            }
         }
     });
 
