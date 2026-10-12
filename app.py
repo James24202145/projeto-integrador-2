@@ -25,29 +25,34 @@ def get_pontos():
 
         # Atualizado para trazer o tipo de ocorrência mais severa ou recente associada
         query = """
-            SELECT 
-                p.id_ponto,
-                p.nome,
-                p.endereco,
-                p.latitude,
-                p.longitude,
-                p.tipo,
-                p.capacidade_vagas,
-                p.gratuito,
-                p.coberto,
-                p.status_operacional,
-                o.nome AS operador,
-                (
-                    SELECT oc.tipo 
-                    FROM ocorrencia oc 
-                    WHERE oc.id_ponto = p.id_ponto 
-                    ORDER BY oc.data_relato DESC 
-                    LIMIT 1
-                ) AS ultima_ocorrencia_tipo
-            FROM ponto_apoio p
-            LEFT JOIN operador o ON p.id_operador = o.id_operador
-            WHERE p.status_operacional = 'Ativo';
-        """
+                    SELECT 
+                        p.id_ponto,
+                        p.nome,
+                        p.endereco,
+                        p.latitude,
+                        p.longitude,
+                        p.tipo,
+                        p.capacidade_vagas,
+                        p.gratuito,
+                        p.coberto,
+                        p.status_operacional,
+                        o.nome AS operador,
+                        (
+                            SELECT oc.tipo 
+                            FROM ocorrencia oc 
+                            WHERE oc.id_ponto = p.id_ponto 
+                              AND (
+                                  oc.tipo != 'Ponto de Apoio Lotado' 
+                                  OR oc.data_relato >= NOW() - INTERVAL 3 HOUR
+                              )
+                            ORDER BY oc.data_relato DESC 
+                            LIMIT 1
+                        ) AS ultima_ocorrencia_tipo
+                    FROM ponto_apoio p
+                    LEFT JOIN operador o ON p.id_operador = o.id_operador
+                    WHERE p.status_operacional = 'Ativo';
+                """
+
         cursor.execute(query)
         pontos = cursor.fetchall()
 
@@ -69,6 +74,7 @@ def get_pontos():
 
 
 # Rota da API REST para listar ocorrências de um ponto específico
+
 @app.route('/api/pontos/<int:id_ponto>/ocorrencias', methods=['GET'])
 def get_ocorrencias_ponto(id_ponto):
     conn = None
@@ -79,10 +85,16 @@ def get_ocorrencias_ponto(id_ponto):
             return jsonify({'error': 'Erro ao conectar ao banco de dados'}), 500
 
         cursor = conn.cursor(dictionary=True)
+
+        # Filtra para ocultar "Ponto de Apoio Lotado" com mais de 3 horas
         query = """
             SELECT id_ocorrencia, tipo, descricao, data_relato 
             FROM ocorrencia 
             WHERE id_ponto = %s 
+              AND (
+                  tipo != 'Ponto de Apoio Lotado' 
+                  OR data_relato >= NOW() - INTERVAL 3 HOUR
+              )
             ORDER BY data_relato DESC 
             LIMIT 5;
         """
@@ -103,7 +115,6 @@ def get_ocorrencias_ponto(id_ponto):
             cursor.close()
         if conn:
             conn.close()
-
 
 @app.route('/api/pontos/novo', methods=['POST'])
 def criar_ponto():
