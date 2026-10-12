@@ -1,3 +1,22 @@
+// Função global para alternar entre as abas do painel lateral
+function mudarAba(aba) {
+    const abaExplorar = document.getElementById('aba-explorar');
+    const abaAdicionar = document.getElementById('aba-adicionar');
+    const botoes = document.querySelectorAll('.tab-btn');
+
+    botoes.forEach(btn => btn.classList.remove('active'));
+
+    if (aba === 'explorar') {
+        if (abaExplorar) abaExplorar.style.display = 'flex';
+        if (abaAdicionar) abaAdicionar.style.display = 'none';
+        if (botoes[0]) botoes[0].classList.add('active');
+    } else {
+        if (abaExplorar) abaExplorar.style.display = 'none';
+        if (abaAdicionar) abaAdicionar.style.display = 'flex';
+        if (botoes[1]) botoes[1].classList.add('active');
+    }
+}
+
 // Funções globais para os Modais de Ocorrências
 function abrirModalOcorrencia(idPonto) {
     document.getElementById('ocorrencia-ponto-id').value = idPonto;
@@ -80,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
         camadaMarcadores.clearLayers();
 
         pontos.forEach(ponto => {
-            // Passa a última ocorrência do ponto para definir a cor correspondente do pin
             const icone = obterIconePersonalizado(ponto.tipo, ponto.ultima_ocorrencia_tipo);
             const marker = L.marker([ponto.latitude, ponto.longitude], { icon: icone });
 
@@ -147,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
             camadaMarcadores.addLayer(marker);
         });
 
-        document.getElementById('total-pontos').textContent = pontos.length;
+        const totalEl = document.getElementById('total-pontos');
+        if (totalEl) totalEl.textContent = pontos.length;
     }
 
     // 4. Lógica de Filtros e Busca
@@ -172,12 +191,71 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Escutadores de Eventos nos Filtros
-    document.getElementById('input-busca').addEventListener('input', aplicarFiltros);
-    document.getElementById('select-tipo').addEventListener('change', aplicarFiltros);
-    document.getElementById('check-gratuito').addEventListener('change', aplicarFiltros);
-    document.getElementById('check-coberto').addEventListener('change', aplicarFiltros);
+    const inputBusca = document.getElementById('input-busca');
+    const selectTipo = document.getElementById('select-tipo');
+    const checkGratuito = document.getElementById('check-gratuito');
+    const checkCoberto = document.getElementById('check-coberto');
 
-    // 5. Contador de caracteres para a descrição da ocorrência
+    if (inputBusca) inputBusca.addEventListener('input', aplicarFiltros);
+    if (selectTipo) selectTipo.addEventListener('change', aplicarFiltros);
+    if (checkGratuito) checkGratuito.addEventListener('change', aplicarFiltros);
+    if (checkCoberto) checkCoberto.addEventListener('change', aplicarFiltros);
+
+    // 5. Clique duplo no mapa para preencher coordenadas automaticamente
+    map.on('dblclick', (e) => {
+        const latInput = document.getElementById('novo-lat');
+        const lngInput = document.getElementById('novo-lng');
+        if (latInput && lngInput) {
+            latInput.value = e.latlng.lat.toFixed(6);
+            lngInput.value = e.latlng.lng.toFixed(6);
+            mudarAba('adicionar');
+        }
+    });
+
+    // 6. Submissão do novo ponto de apoio via AJAX
+    const formNovoPonto = document.getElementById('form-novo-ponto');
+    if (formNovoPonto) {
+        formNovoPonto.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const dadosPonto = {
+                nome: document.getElementById('novo-nome').value,
+                tipo: document.getElementById('novo-tipo').value,
+                endereco: document.getElementById('novo-endereco').value,
+                latitude: parseFloat(document.getElementById('novo-lat').value),
+                longitude: parseFloat(document.getElementById('novo-lng').value),
+                capacidade_vagas: parseInt(document.getElementById('novo-vagas').value) || 0,
+                gratuito: document.getElementById('novo-gratuito').checked,
+                coberto: document.getElementById('novo-coberto').checked
+            };
+
+            fetch('/api/pontos/novo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dadosPonto)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.sucesso) {
+                    alert('Ponto de apoio adicionado com sucesso!');
+                    formNovoPonto.reset();
+                    mudarAba('explorar');
+
+                    // Recarrega os pontos no mapa
+                    fetch('/api/pontos')
+                        .then(res => res.json())
+                        .then(dados => {
+                            todosPontos = dados;
+                            renderizarPontos(todosPontos);
+                        });
+                } else {
+                    alert('Erro ao adicionar: ' + data.mensagem);
+                }
+            })
+            .catch(err => console.error('Erro na requisição:', err));
+        });
+    }
+
+    // 7. Contador de caracteres para a descrição da ocorrência
     const textareaDescricao = document.getElementById('ocorrencia-descricao');
     const contadorCaracteres = document.getElementById('contador-caracteres');
 
@@ -189,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 6. Manipulação do envio do formulário de ocorrências via AJAX
+    // 8. Manipulação do envio do formulário de ocorrências via AJAX
     const formOcorrencia = document.getElementById('form-ocorrencia');
     if (formOcorrencia) {
         formOcorrencia.addEventListener('submit', (e) => {
@@ -209,7 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Ocorrência registada com sucesso!');
                     fecharModalOcorrencia();
 
-                    // RECARREGA OS PONTOS DO MAPA AUTOMATICAMENTE
+                    // Recarrega os pontos do mapa automaticamente para atualizar as cores dos pins
                     fetch('/api/pontos')
                         .then(res => res.json())
                         .then(dados => {
@@ -225,7 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(err => console.error('Erro na requisição:', err));
         });
     }
-    // 7. Carrega os pontos do Backend Flask
+
+    // 9. Carrega os pontos iniciais do Backend Flask
     fetch('/api/pontos')
         .then(res => res.json())
         .then(dados => {

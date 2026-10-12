@@ -385,3 +385,41 @@ body, html {
 .pin-alerta-vermelho {
     background-color: #d32f2f !important; /* Vermelho crítico */
 }
+
+/* Sistema de Abas na Sidebar */
+.sidebar-tabs {
+    display: flex;
+    background: #f1f3f4;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 4px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.tab-btn.active {
+    background: #ffffff;
+    color: #2e7d32;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.tab-conteudo {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}

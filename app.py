@@ -105,6 +105,50 @@ def get_ocorrencias_ponto(id_ponto):
             conn.close()
 
 
+
+@app.route('/api/pontos/novo', methods=['POST'])
+def criar_ponto():
+    dados = request.get_json()
+    nome = dados.get('nome')
+    endereco = dados.get('endereco')
+    latitude = dados.get('latitude')
+    longitude = dados.get('longitude')
+    tipo = dados.get('tipo')
+    capacidade_vagas = dados.get('capacidade_vagas', 0)
+    gratuito = 1 if dados.get('gratuito') else 0
+    coberto = 1 if dados.get('coberto') else 0
+
+    if not nome or not endereco or not latitude or not longitude or not tipo:
+        return jsonify({'sucesso': False, 'mensagem': 'Preencha todos os campos obrigatórios.'}), 400
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'sucesso': False, 'mensagem': 'Erro de ligação à base de dados'}), 500
+
+        cursor = conn.cursor()
+        query = """
+            INSERT INTO ponto_apoio (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto, status_operacional) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Ativo');
+        """
+        cursor.execute(query, (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto))
+        conn.commit()
+
+        return jsonify({'sucesso': True, 'mensagem': 'Ponto de apoio adicionado com sucesso!'})
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        return jsonify({'sucesso': False, 'mensagem': str(e)}), 500
+
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 # Rota da API REST para registar ocorrências associadas a um ponto de apoio
 @app.route('/api/ocorrencias', methods=['POST'])
 def criar_ocorrencia():
