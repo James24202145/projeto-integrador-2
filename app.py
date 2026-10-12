@@ -105,7 +105,6 @@ def get_ocorrencias_ponto(id_ponto):
             conn.close()
 
 
-
 @app.route('/api/pontos/novo', methods=['POST'])
 def criar_ponto():
     dados = request.get_json()
@@ -129,11 +128,16 @@ def criar_ponto():
             return jsonify({'sucesso': False, 'mensagem': 'Erro de ligação à base de dados'}), 500
 
         cursor = conn.cursor()
+
+        data_atual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
         query = """
-            INSERT INTO ponto_apoio (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto, status_operacional) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Ativo');
+            INSERT INTO ponto_apoio (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto, status_operacional, data_ultima_verificacao, id_operador) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Ativo', %s, %s);
         """
-        cursor.execute(query, (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto))
+        # AQUI: Substitua o 'None' por '10' no final da tupla abaixo:
+        cursor.execute(query,
+                       (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto, data_atual, 10))
         conn.commit()
 
         return jsonify({'sucesso': True, 'mensagem': 'Ponto de apoio adicionado com sucesso!'})
@@ -148,6 +152,8 @@ def criar_ponto():
             cursor.close()
         if conn:
             conn.close()
+
+
 
 # Rota da API REST para registar ocorrências associadas a um ponto de apoio
 @app.route('/api/ocorrencias', methods=['POST'])
