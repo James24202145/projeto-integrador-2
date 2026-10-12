@@ -69,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
             iconeFa = 'fa-wrench';
         }
 
-        // Regra de cores de alerta para os pins
         if (ultimaOcorrencia) {
             if (
                 ultimaOcorrencia === 'Ponto de Apoio Fechado' ||
@@ -128,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             marker.bindPopup(popupHtml);
 
-            // Carrega dinamicamente as ocorrências quando o popup abre
             marker.on('popupopen', () => {
                 fetch(`/api/pontos/${idPonto}/ocorrencias`)
                     .then(res => res.json())
@@ -156,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         });
                         container.innerHTML = htmlOcorrencias;
                     })
-                    .catch(err => {
+                    .catch(() => {
                         const container = document.getElementById(`lista-oc-${idPonto}`);
                         if (container) container.innerHTML = '<span class="sem-ocorrencias">Não há ocorrências.</span>';
                     });
@@ -190,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarPontos(filtrados);
     }
 
-    // Escutadores de Eventos nos Filtros
     const inputBusca = document.getElementById('input-busca');
     const selectTipo = document.getElementById('select-tipo');
     const checkGratuito = document.getElementById('check-gratuito');
@@ -201,28 +198,72 @@ document.addEventListener('DOMContentLoaded', () => {
     if (checkGratuito) checkGratuito.addEventListener('change', aplicarFiltros);
     if (checkCoberto) checkCoberto.addEventListener('change', aplicarFiltros);
 
-    // 5. Clique duplo no mapa para preencher coordenadas automaticamente
-    map.on('dblclick', (e) => {
-        const latInput = document.getElementById('novo-lat');
-        const lngInput = document.getElementById('novo-lng');
-        if (latInput && lngInput) {
+    // 5. Fluxo em Duas Etapas para Novo Ponto (Coordenadas via clique no mapa)
+    const latInput = document.getElementById('novo-lat');
+    const lngInput = document.getElementById('novo-lng');
+    const btnProximo = document.getElementById('btn-proximo-passo');
+    const passo1Div = document.getElementById('novo-passo-1');
+    const formPonto = document.getElementById('form-novo-ponto');
+    const btnVoltar = document.getElementById('btn-voltar-passo-1');
+    const sidebar = document.getElementById('sidebarPanel');
+    const toggleBtn = document.getElementById('toggleMenuBtn');
+    const textoDica = document.getElementById('texto-dica-mapa');
+
+    if (textoDica) {
+        const isMobile = window.innerWidth <= 768;
+        textoDica.textContent = isMobile
+            ? "Toque no mapa para inserir a localização do novo ponto de apoio."
+            : "Clique no mapa para inserir a localização do novo ponto de apoio.";
+    }
+
+    // Clique no mapa recolhe coordenadas e ativa o botão de prosseguir
+    map.on('click', function(e) {
+        if (latInput && lngInput && btnProximo) {
             latInput.value = e.latlng.lat.toFixed(6);
             lngInput.value = e.latlng.lng.toFixed(6);
-            mudarAba('adicionar');
+
+            btnProximo.removeAttribute('disabled');
+            btnProximo.style.backgroundColor = '#2e7d32';
+            btnProximo.style.cursor = 'pointer';
+            btnProximo.style.opacity = '1';
+
+            if (window.innerWidth <= 768 && sidebar) {
+                sidebar.classList.add('mobile-hidden');
+                if (toggleBtn) toggleBtn.style.display = 'flex';
+            }
         }
     });
 
+    if (btnProximo && passo1Div && formPonto) {
+        btnProximo.addEventListener('click', function(event) {
+            event.preventDefault();
+            if (!latInput.value || !lngInput.value) {
+                alert('Por favor, selecione primeiro um local no mapa.');
+                return;
+            }
+            passo1Div.style.display = 'none';
+            formPonto.style.display = 'flex';
+        });
+    }
+
+    if (btnVoltar && passo1Div && formPonto) {
+        btnVoltar.addEventListener('click', function(event) {
+            event.preventDefault();
+            formPonto.style.display = 'none';
+            passo1Div.style.display = 'block';
+        });
+    }
+
     // 6. Submissão do novo ponto de apoio via AJAX
-    const formNovoPonto = document.getElementById('form-novo-ponto');
-    if (formNovoPonto) {
-        formNovoPonto.addEventListener('submit', (e) => {
+    if (formPonto) {
+        formPonto.addEventListener('submit', (e) => {
             e.preventDefault();
             const dadosPonto = {
                 nome: document.getElementById('novo-nome').value,
                 tipo: document.getElementById('novo-tipo').value,
                 endereco: document.getElementById('novo-endereco').value,
-                latitude: parseFloat(document.getElementById('novo-lat').value),
-                longitude: parseFloat(document.getElementById('novo-lng').value),
+                latitude: parseFloat(latInput.value),
+                longitude: parseFloat(lngInput.value),
                 capacidade_vagas: parseInt(document.getElementById('novo-vagas').value) || 0,
                 gratuito: document.getElementById('novo-gratuito').checked,
                 coberto: document.getElementById('novo-coberto').checked
@@ -237,10 +278,14 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(data => {
                 if (data.sucesso) {
                     alert('Ponto de apoio adicionado com sucesso!');
-                    formNovoPonto.reset();
+                    formPonto.reset();
+                    passo1Div.style.display = 'block';
+                    formPonto.style.display = 'none';
+                    btnProximo.setAttribute('disabled', 'true');
+                    btnProximo.style.backgroundColor = '#ccc';
+                    btnProximo.style.cursor = 'not-allowed';
                     mudarAba('explorar');
 
-                    // Recarrega os pontos no mapa
                     fetch('/api/pontos')
                         .then(res => res.json())
                         .then(dados => {
@@ -287,7 +332,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     alert('Ocorrência registada com sucesso!');
                     fecharModalOcorrencia();
 
-                    // Recarrega os pontos do mapa automaticamente para atualizar as cores dos pins
                     fetch('/api/pontos')
                         .then(res => res.json())
                         .then(dados => {

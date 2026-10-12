@@ -37,7 +37,6 @@
             align-items: center;
             gap: 6px;
         }
-        /* Ajuste para esconder pinos grandes e usar versão miniatura na barra da base se necessário */
         .map-legend-bar .legend-pin-mini {
             width: 20px;
             height: 20px;
@@ -59,32 +58,15 @@
             }
         }
 
-        /* Por defeito em telemóveis, a sidebar começa oculta */
+        /* Comportamento responsivo da Sidebar e Botão Flutuante */
         @media (max-width: 768px) {
             .sidebar.mobile-hidden {
                 display: none !important;
             }
-            /* Estilo base do botão flutuante mobile */
             #toggleMenuBtn {
-                position: absolute;
-                top: 15px;
-                left: 65px; /* Deslocado para a direita para não tapar o zoom (+/-) do Leaflet */
-                z-index: 1050;
-                background-color: #2e7d32;
-                color: white;
-                border: none;
-                padding: 10px 16px;
-                border-radius: 50px;
-                box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-                font-size: 14px;
-                font-weight: 500;
-                cursor: pointer;
-                align-items: center;
-                gap: 8px;
+                display: flex !important;
             }
-
         }
-        /* Em computadores, o botão flutuante nunca aparece */
         @media (min-width: 769px) {
             #toggleMenuBtn {
                 display: none !important;
@@ -113,8 +95,6 @@
             gap: 8px;
         }
     </style>
-
-
 </head>
 <body>
 
@@ -176,23 +156,45 @@
 
     <!-- CONTEÚDO DA ABA: ADICIONAR NOVO PONTO -->
     <div id="aba-adicionar" class="tab-conteudo" style="display: none;">
-        <div class="brand">
-            <i class="fa-solid fa-map-pin brand-icon" style="color: #0288d1;"></i>
-            <div>
-                <h1>Novo Ponto</h1>
-                <p>Cadastre um apoio cicloviário</p>
+
+        <!-- PASSO 1: Seleção de Coordenadas no Mapa -->
+        <div id="novo-passo-1">
+            <div style="margin-bottom: 12px;">
+                <h2 style="font-size: 16px; color: #2e7d32; margin-bottom: 4px;"><i class="fa-solid fa-map-pin"></i> Novo Ponto</h2>
+                <p id="texto-dica-mapa" style="font-size: 12px; color: #555; line-height: 1.4;">Selecione a localização no mapa.</p>
             </div>
+
+            <div style="display: flex; gap: 6px; margin-bottom: 12px; width: 100%;">
+                <div class="form-grupo" style="flex: 1; min-width: 0;">
+                    <label for="novo-lat" style="font-size: 11px;">Latitude:</label>
+                    <input type="text" id="novo-lat" readonly placeholder="Selecione..." style="width: 100%; box-sizing: border-box; padding: 6px 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 11px; background: #f5f5f5; outline: none;">
+                </div>
+                <div class="form-grupo" style="flex: 1; min-width: 0;">
+                    <label for="novo-lng" style="font-size: 11px;">Longitude:</label>
+                    <input type="text" id="novo-lng" readonly placeholder="Selecione..." style="width: 100%; box-sizing: border-box; padding: 6px 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 11px; background: #f5f5f5; outline: none;">
+                </div>
+            </div>
+
+            <button type="button" id="btn-proximo-passo" class="btn-salvar" style="background-color: #ccc; width: 100%; padding: 10px; font-weight: 500; cursor: not-allowed;" disabled>
+                Adicionar / Preencher Detalhes
+            </button>
         </div>
 
-        <form id="form-novo-ponto" style="display: flex; flex-direction: column; gap: 12px; margin-top: 5px;">
+        <!-- PASSO 2: Preenchimento de Detalhes (Oculto inicialmente) -->
+        <form id="form-novo-ponto" style="display: none; flex-direction: column; gap: 10px; margin-top: 5px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 13px; font-weight: 600; color: #2e7d32;"><i class="fa-solid fa-pen-to-square"></i> Detalhes do Local</span>
+                <button type="button" id="btn-voltar-passo-1" style="background: none; border: none; color: #0288d1; font-size: 12px; cursor: pointer;"><i class="fa-solid fa-arrow-left"></i> Alterar Local</button>
+            </div>
+
             <div class="form-grupo">
                 <label for="novo-nome">Nome do Local:</label>
-                <input type="text" id="novo-nome" required placeholder="Ex: Bicicletário Estação X" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+                <input type="text" id="novo-nome" required placeholder="Ex: Bicicletário Estação X" style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box;">
             </div>
 
             <div class="form-grupo">
                 <label for="novo-tipo">Tipo de Ponto:</label>
-                <select id="novo-tipo" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+                <select id="novo-tipo" style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box;">
                     <option value="Bicicletário">Bicicletário</option>
                     <option value="Paraciclo">Paraciclo</option>
                     <option value="Oficina / Suporte">Oficina / Suporte</option>
@@ -201,22 +203,12 @@
 
             <div class="form-grupo">
                 <label for="novo-endereco">Endereço:</label>
-                <input type="text" id="novo-endereco" required placeholder="Rua, Número, Bairro..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+                <input type="text" id="novo-endereco" required placeholder="Rua, Número, Bairro..." style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box;">
             </div>
-
-            <div class="form-grupo" style="flex: 1;">
-                <label for="novo-lat">Latitude:</label>
-                <input type="number" step="any" id="novo-lat" required placeholder="-23.55..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
-            </div>
-            <div class="form-grupo" style="flex: 1;">
-                <label for="novo-lng">Longitude:</label>
-                <input type="number" step="any" id="novo-lng" required placeholder="-46.63..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
-            </div>
-            <small style="font-size: 11px; color: #666; line-height: 1.3;">Dica: Faça duplo clique num local do mapa para preencher as coordenadas automaticamente.</small>
 
             <div class="form-grupo">
                 <label for="novo-vagas">Capacidade de Vagas:</label>
-                <input type="number" id="novo-vagas" min="1" value="10" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+                <input type="number" id="novo-vagas" min="1" value="10" style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box;">
             </div>
 
             <div class="checkbox-group" style="margin-top: 2px;">
@@ -224,28 +216,30 @@
                 <label><input type="checkbox" id="novo-coberto"> Local Coberto</label>
             </div>
 
-            <button type="submit" class="btn-salvar" style="margin-top: 6px;">Guardar Ponto</button>
+            <button type="submit" class="btn-salvar" style="margin-top: 4px; padding: 8px;">Guardar Ponto</button>
         </form>
     </div>
-</div>
+
+</div> <!-- Fim da Sidebar -->
 
 <!-- Container do Mapa -->
 <div id="map"></div>
+
 <!-- Legenda Fixa na Base -->
-    <div class="map-legend-bar">
-        <div class="legend-item">
-            <div class="legend-pin-mini" style="background-color: #2e7d32;"><i class="fa-solid fa-bicycle"></i></div>
-            <span>Bicicletário</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-pin-mini" style="background-color: #0288d1;"><i class="fa-solid fa-square-parking"></i></div>
-            <span>Paraciclo</span>
-        </div>
-        <div class="legend-item">
-            <div class="legend-pin-mini" style="background-color: #e65100;"><i class="fa-solid fa-wrench"></i></div>
-            <span>Oficina / Suporte</span>
-        </div>
+<div class="map-legend-bar">
+    <div class="legend-item">
+        <div class="legend-pin-mini" style="background-color: #2e7d32;"><i class="fa-solid fa-bicycle"></i></div>
+        <span>Bicicletário</span>
     </div>
+    <div class="legend-item">
+        <div class="legend-pin-mini" style="background-color: #0288d1;"><i class="fa-solid fa-square-parking"></i></div>
+        <span>Paraciclo</span>
+    </div>
+    <div class="legend-item">
+        <div class="legend-pin-mini" style="background-color: #e65100;"><i class="fa-solid fa-wrench"></i></div>
+        <span>Oficina / Suporte</span>
+    </div>
+</div>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -253,26 +247,22 @@
 <!-- JavaScript Principal -->
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-<!-- Script de controle do menu mobile -->
-
+<!-- Script de controle do menu mobile (Já integrado no main.js, mantido limpo aqui) -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.getElementById('sidebarPanel');
         const toggleBtn = document.getElementById('toggleMenuBtn');
         const closeBtn = document.getElementById('closeMenuBtn');
 
-        // Em dispositivos móveis, começa oculto para ver o mapa livremente
-        if (window.innerWidth <= 768) {
+        if (window.innerWidth <= 768 && sidebar) {
             sidebar.classList.add('mobile-hidden');
         }
 
         if (toggleBtn && closeBtn && sidebar) {
-            // Ao clicar em "Menu & Filtros", mostra o painel
             toggleBtn.addEventListener('click', function() {
                 sidebar.classList.remove('mobile-hidden');
             });
 
-            // Ao clicar no "X" para fechar, esconde o painel
             closeBtn.addEventListener('click', function() {
                 sidebar.classList.add('mobile-hidden');
             });
