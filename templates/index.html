@@ -13,188 +13,281 @@
 
     <!-- CSS Personalizado -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        /* Por defeito em telemóveis, a sidebar começa oculta */
+        @media (max-width: 768px) {
+            .sidebar.mobile-hidden {
+                display: none !important;
+            }
+            /* Estilo base do botão flutuante mobile */
+            #toggleMenuBtn {
+                position: absolute;
+                top: 15px;
+                left: 65px; /* Deslocado para a direita para não tapar o zoom (+/-) do Leaflet */
+                z-index: 1050;
+                background-color: #2e7d32;
+                color: white;
+                border: none;
+                padding: 10px 16px;
+                border-radius: 50px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+                font-size: 14px;
+                font-weight: 500;
+                cursor: pointer;
+                align-items: center;
+                gap: 8px;
+            }
+
+        }
+        /* Em computadores, o botão flutuante nunca aparece */
+        @media (min-width: 769px) {
+            #toggleMenuBtn {
+                display: none !important;
+            }
+            .btn-close-mobile {
+                display: none !important;
+            }
+        }
+
+        /* Estilo base do botão flutuante mobile */
+        #toggleMenuBtn {
+            position: absolute;
+            top: 15px;
+            left: 65px;
+            z-index: 1050;
+            background-color: #2e7d32;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 50px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+
+
 </head>
 <body>
 
-    <!-- Painel Lateral Flutuante -->
-    <div class="sidebar">
-        <!-- Abas do Painel -->
-        <div class="sidebar-tabs">
-            <button class="tab-btn active" onclick="mudarAba('explorar')"><i class="fa-solid fa-map"></i> Explorar</button>
-            <button class="tab-btn" onclick="mudarAba('adicionar')"><i class="fa-solid fa-plus-circle"></i> Novo Ponto</button>
-        </div>
+<!-- Botão flutuante visível apenas em telemóveis para abrir o menu -->
+<button id="toggleMenuBtn" class="d-md-none">
+    <i class="fa-solid fa-bars"></i> Menu & Filtros
+</button>
 
-        <!-- CONTEÚDO DA ABA: EXPLORAR -->
-        <div id="aba-explorar" class="tab-conteudo">
-            <div class="brand">
-                <i class="fa-solid fa-bicycle brand-icon"></i>
-                <div>
-                    <h1>Ecomapa</h1>
-                    <p>Pontos de apoio cicloviários em SP</p>
-                </div>
-            </div>
+<!-- Painel Lateral Flutuante -->
+<div class="sidebar" id="sidebarPanel">
+    <!-- Botão de Fechar no topo do painel para dispositivos móveis -->
+    <div class="d-flex justify-content-end d-md-none" style="padding: 5px 5px 0 0;">
+        <button id="closeMenuBtn" class="btn-close btn-close-mobile" aria-label="Fechar" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #666;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
 
-            <div class="search-box">
-                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                <input type="text" id="input-busca" placeholder="Buscar por nome ou endereço...">
-            </div>
+    <!-- Abas do Painel -->
+    <div class="sidebar-tabs">
+        <button class="tab-btn active" onclick="mudarAba('explorar')"><i class="fa-solid fa-map"></i> Explorar</button>
+        <button class="tab-btn" onclick="mudarAba('adicionar')"><i class="fa-solid fa-plus-circle"></i> Novo Ponto</button>
+    </div>
 
-            <div class="filter-section">
-                <label class="filter-title">Filtros</label>
-
-                <div class="form-group">
-                    <label for="select-tipo">Tipo de Ponto:</label>
-                    <select id="select-tipo">
-                        <option value="todos">Todos os tipos</option>
-                        <option value="Bicicletário">Bicicletário</option>
-                        <option value="Paraciclo">Paraciclo</option>
-                        <option value="Oficina / Suporte">Oficina / Suporte</option>
-                    </select>
-                </div>
-
-                <div class="checkbox-group">
-                    <label><input type="checkbox" id="check-gratuito"> Apenas Gratuitos</label>
-                    <label><input type="checkbox" id="check-coberto"> Apenas Cobertos</label>
-                </div>
-            </div>
-
-            <!-- Seção de Legenda -->
-            <div class="legend-section">
-                <label class="filter-title">Legenda</label>
-                <div class="legend-container">
-                    <div class="legend-item">
-                        <div class="custom-pin pin-bicicletario legend-pin-fix">
-                            <i class="fa-solid fa-bicycle"></i>
-                        </div>
-                        <span>Bicicletário</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="custom-pin pin-paraciclo legend-pin-fix">
-                            <i class="fa-solid fa-square-parking"></i>
-                        </div>
-                        <span>Paraciclo</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="custom-pin pin-oficina legend-pin-fix">
-                            <i class="fa-solid fa-wrench"></i>
-                        </div>
-                        <span>Oficina / Suporte</span>
-                    </div>
-                </div>
-            </div>
-            <div class="counter">
-                <span id="total-pontos">0</span> pontos encontrados
+    <!-- CONTEÚDO DA ABA: EXPLORAR -->
+    <div id="aba-explorar" class="tab-conteudo">
+        <div class="brand">
+            <i class="fa-solid fa-bicycle brand-icon"></i>
+            <div>
+                <h1>Ecomapa</h1>
+                <p>Pontos de apoio cicloviários em SP</p>
             </div>
         </div>
 
-        <!-- CONTEÚDO DA ABA: ADICIONAR NOVO PONTO -->
-        <div id="aba-adicionar" class="tab-conteudo" style="display: none;">
-            <div class="brand">
-                <i class="fa-solid fa-map-pin brand-icon" style="color: #0288d1;"></i>
-                <div>
-                    <h1>Novo Ponto</h1>
-                    <p>Cadastre um apoio cicloviário</p>
-                </div>
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="input-busca" placeholder="Buscar por nome ou endereço...">
+        </div>
+
+        <div class="filter-section">
+            <label class="filter-title">Filtros</label>
+
+            <div class="form-group">
+                <label for="select-tipo">Tipo de Ponto:</label>
+                <select id="select-tipo">
+                    <option value="todos">Todos os tipos</option>
+                    <option value="Bicicletário">Bicicletário</option>
+                    <option value="Paraciclo">Paraciclo</option>
+                    <option value="Oficina / Suporte">Oficina / Suporte</option>
+                </select>
             </div>
 
-            <form id="form-novo-ponto" style="display: flex; flex-direction: column; gap: 12px; margin-top: 5px;">
-                <div class="form-grupo">
-                    <label for="novo-nome">Nome do Local:</label>
-                    <input type="text" id="novo-nome" required placeholder="Ex: Bicicletário Estação X" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
-                </div>
+            <div class="checkbox-group">
+                <label><input type="checkbox" id="check-gratuito"> Apenas Gratuitos</label>
+                <label><input type="checkbox" id="check-coberto"> Apenas Cobertos</label>
+            </div>
+        </div>
 
-                <div class="form-grupo">
-                    <label for="novo-tipo">Tipo de Ponto:</label>
-                    <select id="novo-tipo" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
-                        <option value="Bicicletário">Bicicletário</option>
-                        <option value="Paraciclo">Paraciclo</option>
-                        <option value="Oficina / Suporte">Oficina / Suporte</option>
-                    </select>
-                </div>
-
-                <div class="form-grupo">
-                    <label for="novo-endereco">Endereço:</label>
-                    <input type="text" id="novo-endereco" required placeholder="Rua, Número, Bairro..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
-                </div>
-
-                <!--div style="display: flex; gap: 8px;" -->
-                    <div class="form-grupo" style="flex: 1;">
-                        <label for="novo-lat">Latitude:</label>
-                        <input type="number" step="any" id="novo-lat" required placeholder="-23.55..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+        <!-- Seção de Legenda -->
+        <div class="legend-section">
+            <label class="filter-title">Legenda</label>
+            <div class="legend-container">
+                <div class="legend-item">
+                    <div class="custom-pin pin-bicicletario legend-pin-fix">
+                        <i class="fa-solid fa-bicycle"></i>
                     </div>
-                    <div class="form-grupo" style="flex: 1;">
-                        <label for="novo-lng">Longitude:</label>
-                        <input type="number" step="any" id="novo-lng" required placeholder="-46.63..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+                    <span>Bicicletário</span>
+                </div>
+                <div class="legend-item">
+                    <div class="custom-pin pin-paraciclo legend-pin-fix">
+                        <i class="fa-solid fa-square-parking"></i>
                     </div>
-                <!-- /div-->
-                <small style="font-size: 11px; color: #666; line-height: 1.3;">Dica: Faça duplo clique num local do mapa para preencher as coordenadas automaticamente.</small>
-
-                <div class="form-grupo">
-                    <label for="novo-vagas">Capacidade de Vagas:</label>
-                    <input type="number" id="novo-vagas" min="1" value="10" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+                    <span>Paraciclo</span>
                 </div>
-
-                <div class="checkbox-group" style="margin-top: 2px;">
-                    <label><input type="checkbox" id="novo-gratuito" checked> Local Gratuito</label>
-                    <label><input type="checkbox" id="novo-coberto"> Local Coberto</label>
+                <div class="legend-item">
+                    <div class="custom-pin pin-oficina legend-pin-fix">
+                        <i class="fa-solid fa-wrench"></i>
+                    </div>
+                    <span>Oficina / Suporte</span>
                 </div>
-
-                <button type="submit" class="btn-salvar" style="margin-top: 6px;">Guardar Ponto</button>
-            </form>
+            </div>
+        </div>
+        <div class="counter">
+            <span id="total-pontos">0</span> pontos encontrados
         </div>
     </div>
 
-    <!-- Container do Mapa -->
-    <div id="map"></div>
-
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-    <!-- JavaScript Principal -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
-    <!-- Modal para Registar Ocorrência -->
-    <div id="modal-ocorrencia" class="modal" style="display: none;">
-        <div class="modal-conteudo">
-            <span class="fechar-modal" onclick="fecharModalOcorrencia()">&times;</span>
-            <h2>Registar Ocorrência</h2>
-            <form id="form-ocorrencia">
-                <input type="hidden" id="ocorrencia-ponto-id">
-
-                <div class="form-grupo">
-                    <label for="ocorrencia-tipo">Tipo de Ocorrência:</label>
-                    <select id="ocorrencia-tipo">
-                        <option value="Vandalismo">Vandalismo</option>
-                        <option value="Avaria/Estrutura Danificada">Avaria/Estrutura Danificada</option>
-                        <option value="Ponto de Apoio Lotado">Ponto de Apoio Lotado</option>
-                        <option value="Ocorrência de Furto/Roubo">Ocorrência de Furto/Roubo</option>
-                        <option value="Ponto de Apoio Fechado">Ponto de Apoio Fechado</option>
-                    </select>
-                </div>
-
-                <div class="form-grupo">
-                    <label for="ocorrencia-descricao">Descrição:</label>
-                    <textarea id="ocorrencia-descricao" rows="4" maxlength="1000" required placeholder="Descreva o problema ou situação..."></textarea>
-                    <div id="contador-caracteres" style="font-size: 11px; color: #666; text-align: right; margin-top: 2px;">0/1000</div>
-                </div>
-
-                <button type="submit" class="btn-salvar">Guardar Ocorrência</button>
-            </form>
+    <!-- CONTEÚDO DA ABA: ADICIONAR NOVO PONTO -->
+    <div id="aba-adicionar" class="tab-conteudo" style="display: none;">
+        <div class="brand">
+            <i class="fa-solid fa-map-pin brand-icon" style="color: #0288d1;"></i>
+            <div>
+                <h1>Novo Ponto</h1>
+                <p>Cadastre um apoio cicloviário</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Modal para Exibir Detalhes da Ocorrência -->
-    <div id="modal-detalhe-ocorrencia" class="modal" style="display: none;">
-        <div class="modal-conteudo">
-            <span class="fechar-modal" onclick="fecharModalDetalhe()">&times;</span>
-            <h2 id="detalhe-tipo" style="color: #d32f2f; margin-bottom: 4px;">Tipo de Ocorrência</h2>
-            <p style="font-size: 12px; color: #666; margin-bottom: 12px;"><i class="fa-regular fa-clock"></i> <span id="detalhe-data"></span></p>
+        <form id="form-novo-ponto" style="display: flex; flex-direction: column; gap: 12px; margin-top: 5px;">
             <div class="form-grupo">
-                <label>Descrição:</label>
-                <p id="detalhe-descricao" style="background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #ddd; max-height: 150px; overflow-y: auto; font-size: 14px; color: #333; word-break: break-word;"></p>
+                <label for="novo-nome">Nome do Local:</label>
+                <input type="text" id="novo-nome" required placeholder="Ex: Bicicletário Estação X" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
             </div>
+
+            <div class="form-grupo">
+                <label for="novo-tipo">Tipo de Ponto:</label>
+                <select id="novo-tipo" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+                    <option value="Bicicletário">Bicicletário</option>
+                    <option value="Paraciclo">Paraciclo</option>
+                    <option value="Oficina / Suporte">Oficina / Suporte</option>
+                </select>
+            </div>
+
+            <div class="form-grupo">
+                <label for="novo-endereco">Endereço:</label>
+                <input type="text" id="novo-endereco" required placeholder="Rua, Número, Bairro..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+            </div>
+
+            <div class="form-grupo" style="flex: 1;">
+                <label for="novo-lat">Latitude:</label>
+                <input type="number" step="any" id="novo-lat" required placeholder="-23.55..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+            </div>
+            <div class="form-grupo" style="flex: 1;">
+                <label for="novo-lng">Longitude:</label>
+                <input type="number" step="any" id="novo-lng" required placeholder="-46.63..." style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+            </div>
+            <small style="font-size: 11px; color: #666; line-height: 1.3;">Dica: Faça duplo clique num local do mapa para preencher as coordenadas automaticamente.</small>
+
+            <div class="form-grupo">
+                <label for="novo-vagas">Capacidade de Vagas:</label>
+                <input type="number" id="novo-vagas" min="1" value="10" style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none;">
+            </div>
+
+            <div class="checkbox-group" style="margin-top: 2px;">
+                <label><input type="checkbox" id="novo-gratuito" checked> Local Gratuito</label>
+                <label><input type="checkbox" id="novo-coberto"> Local Coberto</label>
+            </div>
+
+            <button type="submit" class="btn-salvar" style="margin-top: 6px;">Guardar Ponto</button>
+        </form>
+    </div>
+</div>
+
+<!-- Container do Mapa -->
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- JavaScript Principal -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<!-- Script de controle do menu mobile -->
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebarPanel');
+        const toggleBtn = document.getElementById('toggleMenuBtn');
+        const closeBtn = document.getElementById('closeMenuBtn');
+
+        // Em dispositivos móveis, começa oculto para ver o mapa livremente
+        if (window.innerWidth <= 768) {
+            sidebar.classList.add('mobile-hidden');
+        }
+
+        if (toggleBtn && closeBtn && sidebar) {
+            // Ao clicar em "Menu & Filtros", mostra o painel
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.remove('mobile-hidden');
+            });
+
+            // Ao clicar no "X" para fechar, esconde o painel
+            closeBtn.addEventListener('click', function() {
+                sidebar.classList.add('mobile-hidden');
+            });
+        }
+    });
+</script>
+
+<!-- Modal para Registar Ocorrência -->
+<div id="modal-ocorrencia" class="modal" style="display: none;">
+    <div class="modal-conteudo">
+        <span class="fechar-modal" onclick="fecharModalOcorrencia()">&times;</span>
+        <h2>Registar Ocorrência</h2>
+        <form id="form-ocorrencia">
+            <input type="hidden" id="ocorrencia-ponto-id">
+
+            <div class="form-grupo">
+                <label for="ocorrencia-tipo">Tipo de Ocorrência:</label>
+                <select id="ocorrencia-tipo">
+                    <option value="Vandalismo">Vandalismo</option>
+                    <option value="Avaria/Estrutura Danificada">Avaria/Estrutura Danificada</option>
+                    <option value="Ponto de Apoio Lotado">Ponto de Apoio Lotado</option>
+                    <option value="Ocorrência de Furto/Roubo">Ocorrência de Furto/Roubo</option>
+                    <option value="Ponto de Apoio Fechado">Ponto de Apoio Fechado</option>
+                </select>
+            </div>
+
+            <div class="form-grupo">
+                <label for="ocorrencia-descricao">Descrição:</label>
+                <textarea id="ocorrencia-descricao" rows="4" maxlength="1000" required placeholder="Descreva o problema ou situação..."></textarea>
+                <div id="contador-caracteres" style="font-size: 11px; color: #666; text-align: right; margin-top: 2px;">0/1000</div>
+            </div>
+
+            <button type="submit" class="btn-salvar">Guardar Ocorrência</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal para Exibir Detalhes da Ocorrência -->
+<div id="modal-detalhe-ocorrencia" class="modal" style="display: none;">
+    <div class="modal-conteudo">
+        <span class="fechar-modal" onclick="fecharModalDetalhe()">&times;</span>
+        <h2 id="detalhe-tipo" style="color: #d32f2f; margin-bottom: 4px;">Tipo de Ocorrência</h2>
+        <p style="font-size: 12px; color: #666; margin-bottom: 12px;"><i class="fa-regular fa-clock"></i> <span id="detalhe-data"></span></p>
+        <div class="form-grupo">
+            <label>Descrição:</label>
+            <p id="detalhe-descricao" style="background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #ddd; max-height: 150px; overflow-y: auto; font-size: 14px; color: #333; word-break: break-word;"></p>
         </div>
     </div>
+</div>
 
 </body>
 </html>
