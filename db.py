@@ -3,26 +3,33 @@ import mysql.connector
 from mysql.connector import Error
 from dotenv import load_dotenv
 
-# Carrega as variáveis de ambiente do arquivo .env
+# Carrega variáveis do arquivo .env local (se existir)
 load_dotenv()
 
-def get_db_connection():
-    """
-    Cria e retorna uma conexão com a base de dados MySQL
-    utilizando as credenciais configuradas no .env.
-    """
-    try:
-        connection = mysql.connector.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            user=os.getenv('DB_USER', 'root'),
-            password=os.getenv('DB_PASSWORD', ''),
-            database=os.getenv('DB_NAME', 'ecomapa'),
-            port=int(os.getenv('DB_PORT', 3306)),
-            charset='utf8mb4',
-            use_unicode=True
-        )
-        return connection
-    except Error as e:
-        print(f"Erro ao conectar com o MySQL: {e}")
-        return None
 
+def get_db_connection():
+    try:
+        # Se estiver rodando no Cloud Run, usa o socket do Cloud SQL
+        cloud_sql_connection_name = os.environ.get('INSTANCE_CONNECTION_NAME')
+
+        if cloud_sql_connection_name:
+            unix_socket_path = f"/cloudsql/{cloud_sql_connection_name}"
+
+            conn = mysql.connector.connect(
+                user=os.environ.get('DB_USER', 'root'),
+                password=os.environ.get('DB_PASS'),
+                database=os.environ.get('DB_NAME', 'ecomapa'),
+                unix_socket=unix_socket_path
+            )
+        else:
+            # Conexão local para testes no seu computador
+            conn = mysql.connector.connect(
+                host="localhost",
+                user="root",
+                password="Lu182JmS7",
+                database="ecomapa"
+            )
+        return conn
+    except Error as e:
+        print(f"Erro ao conectar ao MySQL: {e}")
+        return None
