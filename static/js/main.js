@@ -37,6 +37,30 @@ function abrirModalDetalhe(tipo, data, descricao) {
     document.getElementById('modal-detalhe-ocorrencia').style.display = 'flex';
 }
 
+// 10. Carrega dados do OpenWeatherMap para o widget de clima
+    function carregarClima() {
+        fetch('/api/clima')
+            .then(res => res.json())
+            .then(data => {
+                if (data.sucesso && data.clima) {
+                    const tempEl = document.getElementById('weather-temp');
+                    const descEl = document.getElementById('weather-desc');
+                    const iconEl = document.getElementById('weather-icon');
+
+                    if (tempEl) tempEl.textContent = `${data.clima.temperatura}°C`;
+                    if (descEl) descEl.textContent = data.clima.descricao;
+                    if (iconEl) {
+                        iconEl.src = data.clima.icone;
+                        iconEl.style.display = 'block';
+                    }
+                }
+            })
+            .catch(err => console.error('Erro ao carregar clima:', err));
+    }
+
+    // Chama a função ao carregar a página
+    carregarClima();
+
 function fecharModalDetalhe() {
     document.getElementById('modal-detalhe-ocorrencia').style.display = 'none';
 }
@@ -134,18 +158,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const popupHtml = `
                 <div class="popup-content">
                     <span class="popup-tag">${ponto.tipo}</span>
-                    <h3>${ponto.nome}</h3>
                     
-                    <!-- Botão Excluir logo abaixo do título -->
+                    <!-- Cabeçalho com Título e Botão de Rota do Google Maps -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px;">
+                        <h3 style="margin: 0; flex: 1;">${ponto.nome}</h3>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${ponto.latitude},${ponto.longitude}&travelmode=bicycling" 
+                           target="_blank" 
+                           title="Traçar rota de bicicleta no Google Maps" 
+                           style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            <i class="fa-solid fa-person-biking"></i>
+                        </a>
+                    </div>
+                    
+                    <!-- Botão Excluir logo abaixo -->
                     <button onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
                         <i class="fa-solid fa-trash-can"></i> Excluir Ponto
                     </button>
 
                     <p><i class="fa-solid fa-location-dot"></i> ${ponto.endereco}</p>
-                    
-                    <!-- Nova linha de Segurança -->
                     <p><i class="fa-solid fa-shield"></i> <strong>Segurança:</strong> ${ponto.seguranca_geral ? 'Sim' : 'Não'}</p>
-                    
                     <p><i class="fa-solid fa-layer-group"></i> <strong>Vagas:</strong> ${ponto.capacidade_vagas || 'N/I'}</p>
                     <p><i class="fa-solid fa-shield-halved"></i> <strong>Coberto:</strong> ${ponto.coberto ? 'Sim' : 'Não'}</p>
                     <p><i class="fa-solid fa-tag"></i> <strong>Gratuito:</strong> ${ponto.gratuito ? 'Sim' : 'Não'}</p>
@@ -162,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
                 </div>
             `;
-
             marker.bindPopup(popupHtml);
 
             marker.on('popupopen', () => {

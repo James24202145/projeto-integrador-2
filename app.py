@@ -212,6 +212,33 @@ def criar_ponto():
             conn.close()
 
 
+import requests
+
+
+@app.route('/api/clima', methods=['GET'])
+def obter_clima():
+    # Coordenadas padrão centradas em São Paulo / Região Metropolitana
+    lat = request.args.get('lat', '-23.55052')
+    lon = request.args.get('lon', '-46.633309')
+    api_key = 'f27d45582eaeeb85404d750ff50aeca5'  # Coloque aqui a sua chave do OpenWeatherMap
+
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric&lang=pt_br"
+
+    try:
+        resposta = requests.get(url)
+        dados = resposta.json()
+
+        if resposta.status_code == 200:
+            clima_info = {
+                "temperatura": round(dados["main"]["temp"]),
+                "descricao": dados["weather"][0]["description"],
+                "icone": f"https://openweathermap.org/img/wn/{dados['weather'][0]['icon']}@2x.png"
+            }
+            return jsonify({"sucesso": True, "clima": clima_info}), 200
+        else:
+            return jsonify({"sucesso": False, "mensagem": dados.get("message", "Erro ao buscar clima")}), 400
+    except Exception as e:
+        return jsonify({"sucesso": False, "mensagem": str(e)}), 500
 
 # Rota da API REST para registar ocorrências associadas a um ponto de apoio
 @app.route('/api/ocorrencias', methods=['POST'])
