@@ -23,7 +23,7 @@ def get_pontos():
 
         cursor = conn.cursor(dictionary=True)
 
-        # Atualizado para trazer o tipo de ocorrência mais severa ou recente associada
+        # Atualizado para trazer os dados de segurança consolidados e a última ocorrência
         query = """
                     SELECT 
                         p.id_ponto,
@@ -37,6 +37,14 @@ def get_pontos():
                         p.coberto,
                         p.status_operacional,
                         o.nome AS operador,
+                        CASE 
+                            WHEN (
+                                COALESCE(MAX(s.vigilancia_humana), 0) = 1 
+                                OR COALESCE(MAX(s.cameras), 0) = 1 
+                                OR COALESCE(MAX(s.seguro_contra_furto), 0) = 1
+                            ) THEN 1 
+                            ELSE 0 
+                        END AS seguranca_geral,
                         (
                             SELECT oc.tipo 
                             FROM ocorrencia oc 
@@ -50,7 +58,9 @@ def get_pontos():
                         ) AS ultima_ocorrencia_tipo
                     FROM ponto_apoio p
                     LEFT JOIN operador o ON p.id_operador = o.id_operador
-                    WHERE p.status_operacional = 'Ativo';
+                    LEFT JOIN seguranca s ON p.id_ponto = s.id_ponto
+                    WHERE p.status_operacional = 'Ativo'
+                    GROUP BY p.id_ponto;
                 """
 
         cursor.execute(query)
@@ -72,9 +82,7 @@ def get_pontos():
             conn.close()
 
 
-
 # Rota da API REST para listar ocorrências de um ponto específico
-
 @app.route('/api/pontos/<int:id_ponto>/ocorrencias', methods=['GET'])
 def get_ocorrencias_ponto(id_ponto):
     conn = None
@@ -86,7 +94,6 @@ def get_ocorrencias_ponto(id_ponto):
 
         cursor = conn.cursor(dictionary=True)
 
-        # Filtra para ocultar "Ponto de Apoio Lotado" com mais de 3 horas
         query = """
             SELECT id_ocorrencia, tipo, descricao, data_relato 
             FROM ocorrencia 
@@ -116,20 +123,24 @@ def get_ocorrencias_ponto(id_ponto):
         if conn:
             conn.close()
 
-# Rota para apagar ponto
+
+# Rota para apagar ponto (e registos associados por cascata explícita)
 @app.route('/api/pontos/<int:id_ponto>', methods=['DELETE'])
 def excluir_ponto(id_ponto):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # Primeiro, remove todas as ocorrências associadas para evitar erro de chave estrangeira
+        # Primeiro, remove os registos de segurança associados
+        cursor.execute("DELETE FROM seguranca WHERE id_ponto = %s", (id_ponto,))
+
+        # Remove todas as ocorrências associadas
         cursor.execute("DELETE FROM ocorrencia WHERE id_ponto = %s", (id_ponto,))
 
         # Em seguida, remove o ponto de apoio
         cursor.execute("DELETE FROM ponto_apoio WHERE id_ponto = %s", (id_ponto,))
 
         conn.commit()
-        return jsonify({"sucesso": True, "mensagem": "Ponto e ocorrências associadas eliminados com sucesso!"})
+        return jsonify({"sucesso": True, "mensagem": "Ponto e registos associados eliminados com sucesso!"})
     except Exception as e:
         conn.rollback()
         return jsonify({"sucesso": False, "mensagem": str(e)}), 500
@@ -150,6 +161,9 @@ def criar_ponto():
     gratuito = 1 if dados.get('gratuito') else 0
     coberto = 1 if dados.get('coberto') else 0
 
+    # Captura se o checkbox de segurança foi marcado (1 para Sim, 0 para Não)
+    vigilancia_humana = 1 if dados.get('seguranca') else 0
+
     if not nome or not endereco or not latitude or not longitude or not tipo:
         return jsonify({'sucesso': False, 'mensagem': 'Preencha todos os campos obrigatórios.'}), 400
 
@@ -164,13 +178,22 @@ def criar_ponto():
 
         data_atual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        query = """
+        query_ponto = """
             INSERT INTO ponto_apoio (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto, status_operacional, data_ultima_verificacao, id_operador) 
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Ativo', %s, %s);
         """
-        # AQUI: Substitua o 'None' por '10' no final da tupla abaixo:
-        cursor.execute(query,
+        cursor.execute(query_ponto,
                        (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto, data_atual, 10))
+
+        id_novo_ponto = cursor.lastrowid
+
+        # Insere na tabela seguranca utilizando o valor recolhido do checkbox para vigilancia_humana
+        query_seguranca = """
+            INSERT INTO seguranca (vigilancia_humana, cameras, seguro_contra_furto, nivel_avaliado, id_ponto)
+            VALUES (%s, 0, 0, 0, %s);
+        """
+        cursor.execute(query_seguranca, (vigilancia_humana, id_novo_ponto))
+
         conn.commit()
 
         return jsonify({'sucesso': True, 'mensagem': 'Ponto de apoio adicionado com sucesso!'})
@@ -208,7 +231,6 @@ def criar_ocorrencia():
 
         cursor = conn.cursor()
 
-        # Gera a data e hora do momento do registo
         data_relato = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         query = """

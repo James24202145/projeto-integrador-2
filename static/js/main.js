@@ -131,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const marker = L.marker([ponto.latitude, ponto.longitude], { icon: icone });
 
             const idPonto = ponto.id_ponto || ponto.id;
-
             const popupHtml = `
                 <div class="popup-content">
                     <span class="popup-tag">${ponto.tipo}</span>
@@ -143,6 +142,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </button>
 
                     <p><i class="fa-solid fa-location-dot"></i> ${ponto.endereco}</p>
+                    
+                    <!-- Nova linha de Segurança -->
+                    <p><i class="fa-solid fa-shield"></i> <strong>Segurança:</strong> ${ponto.seguranca_geral ? 'Sim' : 'Não'}</p>
+                    
                     <p><i class="fa-solid fa-layer-group"></i> <strong>Vagas:</strong> ${ponto.capacidade_vagas || 'N/I'}</p>
                     <p><i class="fa-solid fa-shield-halved"></i> <strong>Coberto:</strong> ${ponto.coberto ? 'Sim' : 'Não'}</p>
                     <p><i class="fa-solid fa-tag"></i> <strong>Gratuito:</strong> ${ponto.gratuito ? 'Sim' : 'Não'}</p>
@@ -295,7 +298,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 longitude: parseFloat(lngInput.value),
                 capacidade_vagas: parseInt(document.getElementById('novo-vagas').value) || 0,
                 gratuito: document.getElementById('novo-gratuito').checked,
-                coberto: document.getElementById('novo-coberto').checked
+                coberto: document.getElementById('novo-coberto').checked,
+                seguranca: document.getElementById('novo-seguranca').checked // <-- Adicionado aqui
             };
 
             fetch('/api/pontos/novo', {
