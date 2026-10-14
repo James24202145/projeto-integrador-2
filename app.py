@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from flask import Flask, jsonify, render_template, request
 from db import get_db_connection
 
@@ -176,7 +177,8 @@ def criar_ponto():
 
         cursor = conn.cursor()
 
-        data_atual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data_atual = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%Y-%m-%d %H:%M:%S')
+        #data_atual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         query_ponto = """
             INSERT INTO ponto_apoio (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto, status_operacional, data_ultima_verificacao, id_operador) 
@@ -231,7 +233,8 @@ def criar_ocorrencia():
 
         cursor = conn.cursor()
 
-        data_relato = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data_relato = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%Y-%m-%d %H:%M:%S')
+        #data_relato = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         query = """
             INSERT INTO ocorrencia (id_ponto, tipo, descricao, data_relato) 
