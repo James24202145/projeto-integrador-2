@@ -29,6 +29,13 @@ def get_db_connection():
                 password="Lu182JmS7",
                 database="ecomapa"
             )
+
+        # Força o fuso horário da sessão para o horário de Brasília (UTC-3)
+        if conn and conn.is_connected():
+            cursor = conn.cursor()
+            cursor.execute("SET time_zone = '-03:00'")
+            cursor.close()
+
         return conn
     except Error as e:
         print(f"Erro ao conectar ao MySQL: {e}")
