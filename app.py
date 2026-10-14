@@ -116,6 +116,28 @@ def get_ocorrencias_ponto(id_ponto):
         if conn:
             conn.close()
 
+# Rota para apagar ponto
+@app.route('/api/pontos/<int:id_ponto>', methods=['DELETE'])
+def excluir_ponto(id_ponto):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Primeiro, remove todas as ocorrências associadas para evitar erro de chave estrangeira
+        cursor.execute("DELETE FROM ocorrencia WHERE id_ponto = %s", (id_ponto,))
+
+        # Em seguida, remove o ponto de apoio
+        cursor.execute("DELETE FROM ponto_apoio WHERE id_ponto = %s", (id_ponto,))
+
+        conn.commit()
+        return jsonify({"sucesso": True, "mensagem": "Ponto e ocorrências associadas eliminados com sucesso!"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"sucesso": False, "mensagem": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
 @app.route('/api/pontos/novo', methods=['POST'])
 def criar_ponto():
     dados = request.get_json()

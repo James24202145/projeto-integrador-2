@@ -53,6 +53,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const camadaMarcadores = L.layerGroup().addTo(map);
     let todosPontos = [];
 
+    // Função de exclusão de ponto integrada no mesmo escopo para aceder a 'map' e 'renderizarPontos'
+    window.excluirPonto = function(idPonto) {
+        if (confirm('Tem certeza de que deseja eliminar este ponto de apoio? Todos os registos e ocorrências associados serão removidos permanentemente.')) {
+            fetch(`/api/pontos/${idPonto}`, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.sucesso) {
+                    // Fecha o popup aberto imediatamente
+                    map.closePopup();
+
+                    alert('Ponto eliminado com sucesso!');
+
+                    // Recarrega os pontos no mapa para o ponto sumir de imediato sem F5
+                    fetch('/api/pontos')
+                        .then(res => res.json())
+                        .then(dados => {
+                            todosPontos = dados;
+                            renderizarPontos(todosPontos);
+                        });
+                } else {
+                    alert('Erro ao eliminar: ' + data.mensagem);
+                }
+            })
+            .catch(err => console.error('Erro na requisição:', err));
+        }
+    };
+
     // 2. Função para criar o ícone L.divIcon com base no tipo e na última ocorrência
     function obterIconePersonalizado(tipo, ultimaOcorrencia) {
         let classeCor = 'pin-padrao';
@@ -107,6 +136,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="popup-content">
                     <span class="popup-tag">${ponto.tipo}</span>
                     <h3>${ponto.nome}</h3>
+                    
+                    <!-- Botão Excluir logo abaixo do título -->
+                    <button onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-trash-can"></i> Excluir Ponto
+                    </button>
+
                     <p><i class="fa-solid fa-location-dot"></i> ${ponto.endereco}</p>
                     <p><i class="fa-solid fa-layer-group"></i> <strong>Vagas:</strong> ${ponto.capacidade_vagas || 'N/I'}</p>
                     <p><i class="fa-solid fa-shield-halved"></i> <strong>Coberto:</strong> ${ponto.coberto ? 'Sim' : 'Não'}</p>
@@ -216,8 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
             : "Clique no mapa para inserir a localização do novo ponto de apoio.";
     }
 
-
-    // Clique no mapa recolhe coordenadas e ativa o botão de prosseguir (sem fechar a janela)
     map.on('click', function(e) {
         if (latInput && lngInput && btnProximo) {
             latInput.value = e.latlng.lat.toFixed(6);
