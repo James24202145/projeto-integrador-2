@@ -1,3 +1,18 @@
+// Função global para ajustar o tamanho da fonte
+function mudarTamanhoFonte(tamanho) {
+    const body = document.body;
+
+    // Remove classes anteriores de tamanho
+    body.classList.remove('font-large', 'font-xlarge');
+
+    // Adiciona a classe correspondente se não for 'normal'
+    if (tamanho === 'grande') {
+        body.classList.add('font-large');
+    } else if (tamanho === 'muito-grande') {
+        body.classList.add('font-xlarge');
+    }
+}
+
 // Função global para alternar entre as abas do painel lateral
 function mudarAba(aba) {
     const abaExplorar = document.getElementById('aba-explorar');

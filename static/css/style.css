@@ -1,3 +1,26 @@
+/* Classes de Ajuste de Tamanho de Fonte */
+body.font-large {
+    font-size: 115% !important;
+}
+body.font-large .sidebar-panel,
+body.font-large .popup-content,
+body.font-large input,
+body.font-large select,
+body.font-large button {
+    font-size: 1.1rem !important;
+}
+
+body.font-xlarge {
+    font-size: 130% !important;
+}
+body.font-xlarge .sidebar-panel,
+body.font-xlarge .popup-content,
+body.font-xlarge input,
+body.font-xlarge select,
+body.font-xlarge button {
+    font-size: 1.25rem !important;
+}
+
 /* ==========================================
    ESTILOS COMPLETOS PARA O MODO ESCURO (DARK MODE)
    ========================================== */
@@ -82,6 +105,23 @@ body, html {
     width: 100vw;
     height: 100vh;
     z-index: 1;
+}
+/* Adaptação do Seletor de Fontes para o Modo Escuro */
+body.dark-mode div[style*="background: white;"],
+body.dark-mode div[style*="background: #ffffff;"] {
+    background-color: #1e1e1e !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.6) !important;
+}
+
+body.dark-mode div[style*="background: white;"] button,
+body.dark-mode div[style*="background: #ffffff;"] button {
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode div[style*="background: white;"] button:hover,
+body.dark-mode div[style*="background: #ffffff;"] button:hover {
+    background-color: #2d2d2d !important;
+    color: #ffffff !important;
 }
 
 /* Painel Flutuante Lateral */
