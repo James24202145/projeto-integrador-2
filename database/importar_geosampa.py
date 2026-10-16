@@ -14,7 +14,7 @@ from db import get_db_connection
 def buscar_endereco_reverso(latitude, longitude):
     """Consulta a API do Nominatim (OpenStreetMap) para obter o endereço formatado."""
     url = f"https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={latitude}&lon={longitude}"
-    headers = {'User-Agent': 'Ecomapa-Projeto-PI2-SP'}
+    headers = {'User-Agent': 'Cicloponto-Projeto-PI2-SP'}
 
     try:
         resposta = requests.get(url, headers=headers, timeout=10)
@@ -38,7 +38,7 @@ def importar_geosampa(caminho_geojson):
 
     conn = get_db_connection()
     if not conn:
-        print("Erro ao conectar ao banco de dados.")
+        print("Erro ao conectar ao banco de dados cicloponto.")
         return
 
     cursor = conn.cursor()
@@ -60,7 +60,6 @@ def importar_geosampa(caminho_geojson):
         if resultado:
             operador_map[orgao] = resultado[0]
         else:
-            # Informando o campo 'natureza' exigido pela tabela
             cursor.execute(
                 "INSERT INTO operador (nome, natureza) VALUES (%s, %s);",
                 (orgao, 'Público / Concessionária')
@@ -70,18 +69,25 @@ def importar_geosampa(caminho_geojson):
 
     print(f"-> {len(operador_map)} operadores cadastrados/mapeados com sucesso.")
 
-    # Passo B: Limpar a tabela ponto_apoio antes de reimportar
+    # Passo B: Limpar as tabelas dependentes antes de reimportar (respeitando chaves estrangeiras)
     cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
+    cursor.execute("TRUNCATE TABLE seguranca;")
     cursor.execute("TRUNCATE TABLE ponto_apoio;")
     cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
     conn.commit()
 
-    print("\nImportando pontos de apoio e buscando endereços reais...")
+    print("\nImportando pontos de apoio, endereços e registros de segurança padrão...")
 
     query_ponto = """
         INSERT INTO ponto_apoio 
         (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto, status_operacional, data_ultima_verificacao, id_operador)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+    """
+
+    query_seguranca = """
+        INSERT INTO seguranca 
+        (vigilancia_humana, cameras, seguro_contra_furto, nivel_avaliado, id_ponto)
+        VALUES (%s, %s, %s, %s, %s);
     """
 
     inseridos = 0
@@ -130,7 +136,7 @@ def importar_geosampa(caminho_geojson):
         # Pausa obrigatória de 1 segundo para respeitar a API do Nominatim
         time.sleep(1)
 
-        valores = (
+        valores_ponto = (
             str(nome),
             str(endereco),
             float(latitude),
@@ -145,7 +151,13 @@ def importar_geosampa(caminho_geojson):
         )
 
         try:
-            cursor.execute(query_ponto, valores)
+            cursor.execute(query_ponto, valores_ponto)
+            id_ponto_gerado = cursor.lastrowid
+
+            # Insere os dados padrão na tabela segurança (tudo 'não' / 0)
+            valores_seguranca = (0, 0, 0, 0, id_ponto_gerado)
+            cursor.execute(query_seguranca, valores_seguranca)
+
             inseridos += 1
         except Exception as e:
             print(f"Erro ao inserir {nome}: {e}")
@@ -154,7 +166,7 @@ def importar_geosampa(caminho_geojson):
     cursor.close()
     conn.close()
 
-    print(f"\n✅ Importação concluída com sucesso! {inseridos} registros atualizados.")
+    print(f"\n✅ Importação para o banco 'cicloponto' concluída com sucesso! {inseridos} registros atualizados.")
 
 
 if __name__ == '__main__':

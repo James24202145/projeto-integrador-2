@@ -18,7 +18,7 @@ def get_db_connection():
             conn = mysql.connector.connect(
                 user=os.environ.get('DB_USER', 'root'),
                 password=os.environ.get('DB_PASS'),
-                database=os.environ.get('DB_NAME', 'ecomapa'),
+                database=os.environ.get('DB_NAME', 'cicloponto'),
                 unix_socket=unix_socket_path
             )
         else:
@@ -27,7 +27,7 @@ def get_db_connection():
                 host="localhost",
                 user="root",
                 password="Lu182JmS7",
-                database="ecomapa"
+                database="cicloponto"
             )
 
         return conn
