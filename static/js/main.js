@@ -17,6 +17,22 @@ function mudarAba(aba) {
     }
 }
 
+// Função global para alternar entre Modo Claro e Modo Escuro
+function alternarTema() {
+    const body = document.body;
+    const iconeTema = document.getElementById('icone-tema');
+
+    body.classList.toggle('dark-mode');
+    const isDark = body.classList.contains('dark-mode');
+
+    if (isDark) {
+        if (iconeTema) iconeTema.className = 'fa-solid fa-sun';
+    } else {
+        if (iconeTema) iconeTema.className = 'fa-solid fa-moon';
+    }
+}
+
+
 // Funções globais para os Modais de Ocorrências
 function abrirModalOcorrencia(idPonto) {
     document.getElementById('ocorrencia-ponto-id').value = idPonto;
