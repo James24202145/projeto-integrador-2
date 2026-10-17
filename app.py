@@ -12,6 +12,60 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/api/pontos/<int:id_ponto>/editar', methods=['PUT'])
+def editar_ponto(id_ponto):
+    dados = request.get_json()
+
+    capacidade_vagas = dados.get('capacidade_vagas', 0)
+    gratuito = dados.get('gratuito', 0)
+    coberto = dados.get('coberto', 0)
+    vigilancia_humana = dados.get('vigilancia_humana', 0)
+    cameras = dados.get('cameras', 0)
+    data_atual = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%Y-%m-%d %H:%M:%S')
+
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        if not conn:
+            return jsonify({'sucesso': False, 'mensagem': 'Erro de conexão'}), 500
+
+        cursor = conn.cursor()
+
+        # 1. Atualiza tabela ponto_apoio e data_ultima_verificacao
+        query_ponto = """
+            UPDATE ponto_apoio 
+            SET capacidade_vagas = %s, 
+                gratuito = %s, 
+                coberto = %s, 
+                data_ultima_verificacao = %s 
+            WHERE id_ponto = %s
+        """
+        cursor.execute(query_ponto, (capacidade_vagas, gratuito, coberto, data_atual, id_ponto))
+
+        # 2. Atualiza tabela seguranca
+        query_seguranca = """
+            UPDATE seguranca 
+            SET vigilancia_humana = %s, 
+                cameras = %s 
+            WHERE id_ponto = %s
+        """
+        cursor.execute(query_seguranca, (vigilancia_humana, cameras, id_ponto))
+
+        conn.commit()
+
+        return jsonify({'sucesso': True, 'mensagem': 'Ponto atualizado com sucesso!'})
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        return jsonify({'sucesso': False, 'mensagem': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
 # Rota da API REST para listar os pontos de apoio
 @app.route('/api/pontos', methods=['GET'])
 def get_pontos():
@@ -24,45 +78,47 @@ def get_pontos():
 
         cursor = conn.cursor(dictionary=True)
 
-        # Atualizado para trazer os dados de segurança consolidados e a última ocorrência
+        # Em app.py -> rota get_pontos()
         query = """
-                    SELECT 
-                        p.id_ponto,
-                        p.nome,
-                        p.endereco,
-                        p.latitude,
-                        p.longitude,
-                        p.tipo,
-                        p.capacidade_vagas,
-                        p.gratuito,
-                        p.coberto,
-                        p.status_operacional,
-                        o.nome AS operador,
-                        CASE 
-                            WHEN (
-                                COALESCE(MAX(s.vigilancia_humana), 0) = 1 
-                                OR COALESCE(MAX(s.cameras), 0) = 1 
-                                OR COALESCE(MAX(s.seguro_contra_furto), 0) = 1
-                            ) THEN 1 
-                            ELSE 0 
-                        END AS seguranca_geral,
-                        (
-                            SELECT oc.tipo 
-                            FROM ocorrencia oc 
-                            WHERE oc.id_ponto = p.id_ponto 
-                              AND (
-                                  oc.tipo != 'Ponto de Apoio Lotado' 
-                                  OR oc.data_relato >= NOW() - INTERVAL 3 HOUR
-                              )
-                            ORDER BY oc.data_relato DESC 
-                            LIMIT 1
-                        ) AS ultima_ocorrencia_tipo
-                    FROM ponto_apoio p
-                    LEFT JOIN operador o ON p.id_operador = o.id_operador
-                    LEFT JOIN seguranca s ON p.id_ponto = s.id_ponto
-                    WHERE p.status_operacional = 'Ativo'
-                    GROUP BY p.id_ponto;
-                """
+            SELECT 
+                p.id_ponto,
+                p.nome,
+                p.endereco,
+                p.latitude,
+                p.longitude,
+                p.tipo,
+                p.capacidade_vagas,
+                p.gratuito,
+                p.coberto,
+                p.status_operacional,
+                COALESCE(MAX(s.vigilancia_humana), 0) AS vigilancia_humana,
+                COALESCE(MAX(s.cameras), 0) AS cameras,
+                o.nome AS operador,
+                CASE 
+                    WHEN (
+                        COALESCE(MAX(s.vigilancia_humana), 0) = 1 
+                        OR COALESCE(MAX(s.cameras), 0) = 1 
+                        OR COALESCE(MAX(s.seguro_contra_furto), 0) = 1
+                    ) THEN 1 
+                    ELSE 0 
+                END AS seguranca_geral,
+                (
+                    SELECT oc.tipo 
+                    FROM ocorrencia oc 
+                    WHERE oc.id_ponto = p.id_ponto 
+                      AND (
+                          oc.tipo != 'Ponto de Apoio Lotado' 
+                          OR oc.data_relato >= NOW() - INTERVAL 3 HOUR
+                      )
+                    ORDER BY oc.data_relato DESC 
+                    LIMIT 1
+                ) AS ultima_ocorrencia_tipo
+            FROM ponto_apoio p
+            LEFT JOIN operador o ON p.id_operador = o.id_operador
+            LEFT JOIN seguranca s ON p.id_ponto = s.id_ponto
+            WHERE p.status_operacional = 'Ativo'
+            GROUP BY p.id_ponto;
+        """
 
         cursor.execute(query)
         pontos = cursor.fetchall()

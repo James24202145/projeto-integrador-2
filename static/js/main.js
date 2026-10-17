@@ -1,3 +1,32 @@
+// Variável global para armazenar a lista de pontos
+let todosPontos = [];
+
+// Funções Globais para o Modal de Edição
+function abrirModalEdicao(idPonto) {
+    document.getElementById('edit-ponto-id').value = idPonto;
+
+    // Procura os dados atuais do ponto na lista carregada
+    const ponto = todosPontos.find(p => (p.id_ponto || p.id) == idPonto);
+
+    if (ponto) {
+        document.getElementById('edit-vagas').value = ponto.capacidade_vagas || 0;
+        document.getElementById('edit-gratuito').checked = ponto.gratuito === 1 || ponto.gratuito === true;
+        document.getElementById('edit-coberto').checked = ponto.coberto === 1 || ponto.coberto === true;
+        document.getElementById('edit-vigilancia').checked = ponto.vigilancia_humana === 1 || ponto.vigilancia_humana === true;
+        document.getElementById('edit-cameras').checked = ponto.cameras === 1 || ponto.cameras === true;
+    }
+
+    document.getElementById('modal-editar-ponto').style.display = 'flex';
+}
+
+function fecharModalEdicao() {
+    document.getElementById('modal-editar-ponto').style.display = 'none';
+    document.getElementById('form-editar-ponto').reset();
+}
+
+
+
+
 // Função global para ajustar o tamanho da fonte
 function mudarTamanhoFonte(tamanho) {
     const body = document.body;
@@ -106,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }).addTo(map);
 
     const camadaMarcadores = L.layerGroup().addTo(map);
-    let todosPontos = [];
+
 
     // Função de exclusão de ponto integrada no mesmo escopo para aceder a 'map' e 'renderizarPontos'
     window.excluirPonto = function(idPonto) {
@@ -200,11 +229,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             <i class="fa-solid fa-person-biking"></i>
                         </a>
                     </div>
-                    
-                    <!-- Botão Excluir logo abaixo -->
-                    <button onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; margin-bottom: 8px; display: flex; align-items: center; gap: 4px;">
-                        <i class="fa-solid fa-trash-can"></i> Excluir Ponto
-                    </button>
+                    <!-- Ações: Editar e Excluir lado a lado -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 8px;">
+                        <button onclick="abrirModalEdicao(${idPonto})" style="background: none; border: none; color: #0288d1; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-pen-to-square"></i> Editar Ponto
+                        </button>
+                        <button onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-trash-can"></i> Excluir Ponto
+                        </button>
+                    </div>
+                 
 
                     <p><i class="fa-solid fa-location-dot"></i> ${ponto.endereco}</p>
                     <p><i class="fa-solid fa-shield"></i> <strong>Segurança:</strong> ${ponto.seguranca_geral ? 'Sim' : 'Não'}</p>
@@ -355,50 +389,47 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 6. Submissão do novo ponto de apoio via AJAX
-    if (formPonto) {
-        formPonto.addEventListener('submit', (e) => {
+    // 6. Submissão do Formulário de Edição
+    const formEditar = document.getElementById('form-editar-ponto');
+    if (formEditar) {
+        formEditar.addEventListener('submit', (e) => {
             e.preventDefault();
-            const dadosPonto = {
-                nome: document.getElementById('novo-nome').value,
-                tipo: document.getElementById('novo-tipo').value,
-                endereco: document.getElementById('novo-endereco').value,
-                latitude: parseFloat(latInput.value),
-                longitude: parseFloat(lngInput.value),
-                capacidade_vagas: parseInt(document.getElementById('novo-vagas').value) || 0,
-                gratuito: document.getElementById('novo-gratuito').checked,
-                coberto: document.getElementById('novo-coberto').checked,
-                seguranca: document.getElementById('novo-seguranca').checked // <-- Adicionado aqui
+            const idPonto = document.getElementById('edit-ponto-id').value;
+
+            const dadosAtualizados = {
+                capacidade_vagas: parseInt(document.getElementById('edit-vagas').value) || 0,
+                gratuito: document.getElementById('edit-gratuito').checked ? 1 : 0,
+                coberto: document.getElementById('edit-coberto').checked ? 1 : 0,
+                vigilancia_humana: document.getElementById('edit-vigilancia').checked ? 1 : 0,
+                cameras: document.getElementById('edit-cameras').checked ? 1 : 0
             };
 
-            fetch('/api/pontos/novo', {
-                method: 'POST',
+            fetch(`/api/pontos/${idPonto}/editar`, {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dadosPonto)
+                body: JSON.stringify(dadosAtualizados)
             })
             .then(res => res.json())
             .then(data => {
                 if (data.sucesso) {
-                    alert('Ponto de apoio adicionado com sucesso!');
-                    formPonto.reset();
-                    passo1Div.style.display = 'block';
-                    formPonto.style.display = 'none';
-                    btnProximo.setAttribute('disabled', 'true');
-                    btnProximo.style.backgroundColor = '#ccc';
-                    btnProximo.style.cursor = 'not-allowed';
-                    mudarAba('explorar');
+                    alert('Ponto de apoio atualizado com sucesso!');
+                    fecharModalEdicao();
 
+                    // Fecha o popup aberto para forçar a atualização visual imediata
+                    map.closePopup();
+
+                    // Recarrega os pontos da API e reaplica os filtros vigentes
                     fetch('/api/pontos')
                         .then(res => res.json())
                         .then(dados => {
                             todosPontos = dados;
-                            renderizarPontos(todosPontos);
+                            aplicarFiltros();
                         });
                 } else {
-                    alert('Erro ao adicionar: ' + data.mensagem);
+                    alert('Erro ao atualizar: ' + data.mensagem);
                 }
             })
-            .catch(err => console.error('Erro na requisição:', err));
+            .catch(err => console.error('Erro ao atualizar ponto:', err));
         });
     }
 
