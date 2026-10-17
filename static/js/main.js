@@ -272,16 +272,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const tipoSelecionado = document.getElementById('select-tipo').value;
         const apenasGratuito = document.getElementById('check-gratuito').checked;
         const apenasCoberto = document.getElementById('check-coberto').checked;
+        const apenasSeguranca = document.getElementById('check-seguranca').checked; // <--- Captura o checkbox de segurança
 
         const filtrados = todosPontos.filter(ponto => {
             const atendeTexto = ponto.nome.toLowerCase().includes(textoBusca) ||
                                 ponto.endereco.toLowerCase().includes(textoBusca);
 
             const atendeTipo = tipoSelecionado === 'todos' || ponto.tipo === tipoSelecionado;
-            const atendeGratuito = !apenasGratuito || ponto.gratuito === 1;
-            const atendeCoberto = !apenasCoberto || ponto.coberto === 1;
+            const atendeGratuito = !apenasGratuito || ponto.gratuito === 1 || ponto.gratuito === true;
+            const atendeCoberto = !apenasCoberto || ponto.coberto === 1 || ponto.coberto === true;
+            const atendeSeguranca = !apenasSeguranca || ponto.seguranca === 1 || ponto.seguranca === true || ponto.seguranca_geral === 1 || ponto.seguranca_geral === true;
+            //const atendeGratuito = !apenasGratuito || ponto.gratuito === 1;
+            //const atendeCoberto = !apenasCoberto || ponto.coberto === 1;
+            //const atendeSeguranca = !apenasSeguranca || ponto.seguranca === 1; // <--- Valida a segurança
 
-            return atendeTexto && atendeTipo && atendeGratuito && atendeCoberto;
+            return atendeTexto && atendeTipo && atendeGratuito && atendeCoberto && atendeSeguranca;
         });
 
         renderizarPontos(filtrados);
@@ -291,11 +296,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectTipo = document.getElementById('select-tipo');
     const checkGratuito = document.getElementById('check-gratuito');
     const checkCoberto = document.getElementById('check-coberto');
+    const checkSeguranca = document.getElementById('check-seguranca'); // <--- Adicione esta linha
+
 
     if (inputBusca) inputBusca.addEventListener('input', aplicarFiltros);
     if (selectTipo) selectTipo.addEventListener('change', aplicarFiltros);
     if (checkGratuito) checkGratuito.addEventListener('change', aplicarFiltros);
     if (checkCoberto) checkCoberto.addEventListener('change', aplicarFiltros);
+    if (checkSeguranca) checkSeguranca.addEventListener('change', aplicarFiltros); // <--- Adicione esta linha
 
     // 5. Fluxo em Duas Etapas para Novo Ponto (Coordenadas via clique no mapa)
     const latInput = document.getElementById('novo-lat');
