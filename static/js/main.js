@@ -1,6 +1,145 @@
+
 // Variável global para armazenar a lista de pontos
 let todosPontos = [];
 
+// Variável para guardar a instância do Chart.js e permitir destruir/recriar o gráfico
+let meuGrafico = null;
+
+function abrirModalEstatisticas() {
+    const modal = document.getElementById('modal-estatisticas');
+    if (modal) {
+        modal.style.display = 'flex'; // Força a exibição como flexbox centralizado
+        const primeiroBotao = document.querySelector('.btn-aba-grafico');
+        carregarGrafico('infraestrutura', primeiroBotao);
+    } else {
+        console.error("Erro: O elemento modal-estatisticas não foi encontrado no HTML.");
+    }
+}
+
+function fecharModalEstatisticas() {
+    document.getElementById('modal-estatisticas').style.display = 'none';
+}
+function carregarGrafico(tipo, elementoBotao) {
+    if (elementoBotao) {
+        document.querySelectorAll('.btn-aba-grafico').forEach(btn => btn.classList.remove('active'));
+        elementoBotao.classList.add('active');
+    }
+
+    if (meuGrafico) {
+        meuGrafico.destroy();
+    }
+
+    const ctx = document.getElementById('meuGraficoChart').getContext('2d');
+
+    if (tipo === 'infraestrutura') {
+        const contagem = {};
+        todosPontos.forEach(p => {
+            contagem[p.tipo] = (contagem[p.tipo] || 0) + 1;
+        });
+
+        meuGrafico = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(contagem),
+                datasets: [{
+                    data: Object.values(contagem),
+                    backgroundColor: ['#2e7d32', '#0288d1', '#f57c00', '#7b1fa2']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { title: { display: true, text: 'Distribuição por Tipo de Infraestrutura' } }
+            }
+        });
+    } else if (tipo === 'gratuidade') {
+        let gratGrat = 0, gratPago = 0;
+        todosPontos.forEach(p => {
+            if (p.gratuito === 1 || p.gratuito === true) gratGrat++;
+            else gratPago++;
+        });
+
+        meuGrafico = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Gratuitos', 'Pagos / Restritos'],
+                datasets: [{
+                    label: 'Quantidade de Pontos',
+                    data: [gratGrat, gratPago],
+                    backgroundColor: ['#4caf50', '#ff9800']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { title: { display: true, text: 'Gratuidade dos Pontos de Apoio' } }
+            }
+        });
+    } else if (tipo === 'seguranca') {
+        let comSeg = 0, semSeg = 0;
+        todosPontos.forEach(p => {
+            if (p.seguranca_geral === 1 || p.seguranca_geral === true) comSeg++;
+            else semSeg++;
+        });
+
+        meuGrafico = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Com Elemento de Segurança', 'Sem Segurança Registada'],
+                datasets: [{
+                    data: [comSeg, semSeg],
+                    backgroundColor: ['#2e7d32', '#d32f2f']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { title: { display: true, text: 'Panorama de Segurança da Rede' } }
+            }
+        });
+    } else if (tipo === 'vagas') {
+        const vagasPorTipo = {};
+        todosPontos.forEach(p => {
+            const t = p.tipo || 'Outros';
+            vagasPorTipo[t] = (vagasPorTipo[t] || 0) + (p.capacidade_vagas || 0);
+        });
+
+        meuGrafico = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(vagasPorTipo),
+                datasets: [{
+                    label: 'Total de Vagas',
+                    data: Object.values(vagasPorTipo),
+                    backgroundColor: '#0288d1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { title: { display: true, text: 'Capacidade Total de Vagas por Categoria' } }
+            }
+        });
+    } else if (tipo === 'ocorrencias_tipo' || tipo === 'ocorrencias_tempo') {
+        // Exemplo demonstrativo para os gráficos baseados em ocorrências
+        meuGrafico = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Vandalismo', 'Lotado', 'Avaria Estrutural', 'Furto/Roubo', 'Fechado'],
+                datasets: [{
+                    label: 'Ocorrências Registadas',
+                    data: [2, 5, 3, 1, 4],
+                    backgroundColor: '#e65100'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { title: { display: true, text: tipo === 'ocorrencias_tipo' ? 'Incidência por Tipo de Ocorrência' : 'Evolução Temporal dos Relatos' } }
+            }
+        });
+    }
+}
 // Funções Globais para o Modal de Edição
 function abrirModalEdicao(idPonto) {
     document.getElementById('edit-ponto-id').value = idPonto;

@@ -1,3 +1,76 @@
+/* Botão Flutuante de Estatísticas */
+#btn-estatisticas {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 1000;
+    transition: transform 0.2s, background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#btn-estatisticas:hover {
+    background-color: #1b5e20;
+    transform: scale(1.08);
+}
+
+/* Modal Ajustado para Gráficos */
+.modal-estatisticas-conteudo {
+    width: 90%;
+    max-width: 850px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.botoes-graficos-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 15px 0 20px 0;
+    justify-content: center;
+}
+
+.btn-aba-grafico {
+    background-color: #f1f3f4;
+    border: 1px solid #dadce0;
+    color: #3c4043;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-aba-grafico:hover {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.btn-aba-grafico.active {
+    background-color: #2e7d32;
+    color: white;
+    border-color: #2e7d32;
+}
+
+.area-grafico-container {
+    position: relative;
+    width: 100%;
+    height: 380px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 /* Classes de Ajuste de Tamanho de Fonte */
 body.font-large {
     font-size: 115% !important;
