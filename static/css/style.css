@@ -1,16 +1,16 @@
-/* Botão Flutuante de Estatísticas */
+/* Botão Flutuante de Estatísticas Alinhado à Direita e Acima da Legenda */
 #btn-estatisticas {
     position: fixed;
-    bottom: 25px;
-    right: 25px;
-    width: 55px;
-    height: 55px;
+    bottom: 60px; /* Sobe o botão para ficar acima da legenda (que fica na base) */
+    right: 10px;  /* Ajustado para 10px para alinhar com o botão de tema e o painel A/A+/A++ */
+    width: 42px;  /* Tamanho ajustado para harmonizar com o botão do tema */
+    height: 42px;
     border-radius: 50%;
     background-color: #2e7d32;
     color: white;
     border: none;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    font-size: 22px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    font-size: 18px;
     cursor: pointer;
     z-index: 1000;
     transition: transform 0.2s, background-color 0.2s;
@@ -24,31 +24,45 @@
     transform: scale(1.08);
 }
 
-/* Modal Ajustado para Gráficos */
+/* Ajustes gerais do modal de estatísticas para dispositivos móveis */
 .modal-estatisticas-conteudo {
-    width: 90%;
-    max-width: 850px;
-    max-height: 90vh;
+    width: 95% !important;
+    max-width: 650px !important;
+    padding: 12px 15px !important;
+    max-height: 88vh !important;
     overflow-y: auto;
 }
 
-.botoes-graficos-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 15px 0 20px 0;
-    justify-content: center;
+/* Título mais compacto e próximo do topo */
+.modal-estatisticas-conteudo h2 {
+    font-size: 15px !important;
+    margin-bottom: 8px !important;
+    margin-top: 0 !important;
+    padding-right: 20px;
 }
 
+/* Grelha compacta para os 6 botões (2 colunas em telemóveis) */
+.botoes-graficos-container {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important; /* 3 colunas no PC */
+    gap: 5px !important;
+    margin: 8px 0 10px 0 !important;
+}
+
+/* Botões menores, com fonte reduzida e padding otimizado */
 .btn-aba-grafico {
     background-color: #f1f3f4;
     border: 1px solid #dadce0;
     color: #3c4043;
-    padding: 8px 14px;
-    border-radius: 20px;
-    font-size: 13px;
+    padding: 5px 8px !important;
+    border-radius: 12px !important;
+    font-size: 11px !important;
     font-weight: 600;
     cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     transition: all 0.2s ease;
 }
 
@@ -63,14 +77,26 @@
     border-color: #2e7d32;
 }
 
+/* Redução da altura da área do gráfico para encaixar na tela do telemóvel */
 .area-grafico-container {
     position: relative;
     width: 100%;
-    height: 380px;
+    height: 250px !important; /* Altura ideal para telemóveis */
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
+/* Responsividade específica para telas muito pequenas (telemóveis estreitos) */
+@media (max-width: 576px) {
+    .botoes-graficos-container {
+        grid-template-columns: repeat(2, 1fr) !important; /* Passa para 2 colunas para poupar espaço vertical */
+    }
+    .area-grafico-container {
+        height: 220px !important;
+    }
+}
+
 /* Classes de Ajuste de Tamanho de Fonte */
 body.font-large {
     font-size: 115% !important;
