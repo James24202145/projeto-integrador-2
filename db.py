@@ -33,3 +33,11 @@ def get_db_connection():
     except Error as e:
         print(f"Erro ao conectar ao MySQL: {e}")
         return None
+
+
+def fechar_conexao(conn, cursor):
+    """Fecha o cursor e a conexão, ignorando os que não chegaram a ser abertos."""
+    if cursor:
+        cursor.close()
+    if conn:
+        conn.close()

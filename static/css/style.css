@@ -629,3 +629,86 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     flex-direction: column;
     gap: 16px;
 }
+
+/* ==========================================
+   LEGENDA E MENU MOBILE (movido do index.html)
+   ========================================== */
+/* Legenda Fixa na Base (PC e Mobile) */
+.map-legend-bar {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    background: white;
+    padding: 8px 14px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+}
+.map-legend-bar .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.map-legend-bar .legend-pin-mini {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+}
+@media (max-width: 768px) {
+    .map-legend-bar {
+        bottom: 15px;
+        left: 10px;
+        right: 10px;
+        justify-content: space-around;
+        padding: 6px 8px;
+        gap: 5px;
+    }
+}
+
+/* Comportamento responsivo da Sidebar e Botão Flutuante */
+@media (max-width: 768px) {
+    .sidebar.mobile-hidden {
+        display: none !important;
+    }
+    #toggleMenuBtn {
+        display: flex !important;
+    }
+}
+@media (min-width: 769px) {
+    #toggleMenuBtn {
+        display: none !important;
+    }
+    .btn-close-mobile {
+        display: none !important;
+    }
+}
+
+/* Estilo base do botão flutuante mobile */
+#toggleMenuBtn {
+    position: absolute;
+    top: 15px;
+    left: 65px;
+    z-index: 1050;
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 50px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    align-items: center;
+    gap: 8px;
+}

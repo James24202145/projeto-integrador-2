@@ -60,7 +60,17 @@ A aplicação foi desenvolvida seguindo uma arquitetura modular, dividida nas se
 Projeto Integrador II/
 ├── .gitignore
 ├── requirements.txt
-├── app.py
+├── Dockerfile
+├── app.py              # Cria o Flask e registra as rotas
+├── config.py           # Constantes (fuso, janela de lotação, chave do clima...)
+├── db.py               # Conexão com o MySQL
+├── utils.py            # Funções de data/hora (fuso de São Paulo)
+├── routes/
+│   ├── paginas.py      # Página principal
+│   ├── pontos.py       # API de pontos de apoio
+│   ├── ocorrencias.py  # API de ocorrências
+│   └── clima.py        # API de clima (OpenWeatherMap)
+├── database/           # Backup do banco e script de importação do GeoSampa
 ├── static/
 │   ├── css/
 │   └── js/

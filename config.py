@@ -1,0 +1,28 @@
+import os
+from datetime import timedelta
+from zoneinfo import ZoneInfo
+
+from dotenv import load_dotenv
+
+# Carrega variáveis do arquivo .env local
+load_dotenv()
+
+# Fuso horário da aplicação. Todas as datas são geradas aqui, no Python,
+# e nunca pelo relógio do MySQL (NOW()), que no Cloud SQL costuma estar em UTC.
+FUSO_SP = ZoneInfo("America/Sao_Paulo")
+
+# Tempo durante o qual uma ocorrência "Ponto de Apoio Lotado" continua valendo
+JANELA_LOTADO = timedelta(hours=3)
+
+# Formato usado para gravar datas nas colunas DATETIME do MySQL
+FORMATO_DATA_MYSQL = '%Y-%m-%d %H:%M:%S'
+
+# Operador atribuído aos pontos cadastrados pela interface
+ID_OPERADOR_PADRAO = 10
+
+# Coordenadas padrão centradas em São Paulo / Região Metropolitana
+LATITUDE_PADRAO = '-23.55052'
+LONGITUDE_PADRAO = '-46.633309'
+
+# Chave do OpenWeatherMap, lida do .env (local) ou das variáveis de ambiente (Cloud Run)
+OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY')
