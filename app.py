@@ -1,9 +1,26 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from flask import Flask, jsonify, render_template, request
 from db import get_db_connection
 
 app = Flask(__name__)
+
+# Fuso horário da aplicação. Todas as datas são geradas aqui, no Python,
+# e nunca pelo relógio do MySQL (NOW()), que no Cloud SQL costuma estar em UTC.
+FUSO_SP = ZoneInfo("America/Sao_Paulo")
+
+# Tempo durante o qual uma ocorrência "Ponto de Apoio Lotado" continua valendo
+JANELA_LOTADO = timedelta(hours=3)
+
+
+def agora_sp():
+    """Data e hora atuais de São Paulo, sem informação de fuso (formato do DATETIME do MySQL)."""
+    return datetime.now(FUSO_SP).replace(tzinfo=None)
+
+
+def limite_lotado():
+    """Ocorrências de lotação anteriores a este momento são ignoradas."""
+    return agora_sp() - JANELA_LOTADO
 
 
 # Rota da página web (Front-end com Leaflet.js)
@@ -21,7 +38,7 @@ def editar_ponto(id_ponto):
     coberto = dados.get('coberto', 0)
     vigilancia_humana = dados.get('vigilancia_humana', 0)
     cameras = dados.get('cameras', 0)
-    data_atual = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%Y-%m-%d %H:%M:%S')
+    data_atual = agora_sp().strftime('%Y-%m-%d %H:%M:%S')
 
     conn = None
     cursor = None
@@ -108,7 +125,7 @@ def get_pontos():
                     WHERE oc.id_ponto = p.id_ponto 
                       AND (
                           oc.tipo != 'Ponto de Apoio Lotado' 
-                          OR oc.data_relato >= NOW() - INTERVAL 3 HOUR
+                          OR oc.data_relato >= %s
                       )
                     ORDER BY oc.data_relato DESC 
                     LIMIT 1
@@ -120,7 +137,7 @@ def get_pontos():
             GROUP BY p.id_ponto;
         """
 
-        cursor.execute(query)
+        cursor.execute(query, (limite_lotado(),))
         pontos = cursor.fetchall()
 
         for ponto in pontos:
@@ -157,12 +174,12 @@ def get_ocorrencias_ponto(id_ponto):
             WHERE id_ponto = %s 
               AND (
                   tipo != 'Ponto de Apoio Lotado' 
-                  OR data_relato >= NOW() - INTERVAL 3 HOUR
+                  OR data_relato >= %s
               )
             ORDER BY data_relato DESC 
             LIMIT 5;
         """
-        cursor.execute(query, (id_ponto,))
+        cursor.execute(query, (id_ponto, limite_lotado()))
         ocorrencias = cursor.fetchall()
 
         for oc in ocorrencias:
@@ -181,13 +198,13 @@ def get_ocorrencias_ponto(id_ponto):
             conn.close()
 
 
-# Rota para apagar ponto (e registos associados por cascata explícita)
+# Rota para excluir ponto (e registros associados por cascata explícita)
 @app.route('/api/pontos/<int:id_ponto>', methods=['DELETE'])
 def excluir_ponto(id_ponto):
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        # Primeiro, remove os registos de segurança associados
+        # Primeiro, remove os registros de segurança associados
         cursor.execute("DELETE FROM seguranca WHERE id_ponto = %s", (id_ponto,))
 
         # Remove todas as ocorrências associadas
@@ -197,7 +214,7 @@ def excluir_ponto(id_ponto):
         cursor.execute("DELETE FROM ponto_apoio WHERE id_ponto = %s", (id_ponto,))
 
         conn.commit()
-        return jsonify({"sucesso": True, "mensagem": "Ponto e registos associados eliminados com sucesso!"})
+        return jsonify({"sucesso": True, "mensagem": "Ponto e registros associados excluídos com sucesso!"})
     except Exception as e:
         conn.rollback()
         return jsonify({"sucesso": False, "mensagem": str(e)}), 500
@@ -229,12 +246,11 @@ def criar_ponto():
     try:
         conn = get_db_connection()
         if not conn:
-            return jsonify({'sucesso': False, 'mensagem': 'Erro de ligação à base de dados'}), 500
+            return jsonify({'sucesso': False, 'mensagem': 'Erro de conexão com o banco de dados'}), 500
 
         cursor = conn.cursor()
 
-        data_atual = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%Y-%m-%d %H:%M:%S')
-        #data_atual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data_atual = agora_sp().strftime('%Y-%m-%d %H:%M:%S')
 
         query_ponto = """
             INSERT INTO ponto_apoio (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto, status_operacional, data_ultima_verificacao, id_operador) 
@@ -245,7 +261,7 @@ def criar_ponto():
 
         id_novo_ponto = cursor.lastrowid
 
-        # Insere na tabela seguranca utilizando o valor recolhido do checkbox para vigilancia_humana
+        # Insere na tabela seguranca usando o valor obtido do checkbox para vigilancia_humana
         query_seguranca = """
             INSERT INTO seguranca (vigilancia_humana, cameras, seguro_contra_furto, nivel_avaliado, id_ponto)
             VALUES (%s, 0, 0, 0, %s);
@@ -296,7 +312,7 @@ def obter_clima():
     except Exception as e:
         return jsonify({"sucesso": False, "mensagem": str(e)}), 500
 
-# Rota da API REST para registar ocorrências associadas a um ponto de apoio
+# Rota da API REST para registrar ocorrências associadas a um ponto de apoio
 @app.route('/api/ocorrencias', methods=['POST'])
 def criar_ocorrencia():
     dados = request.get_json()
@@ -312,12 +328,11 @@ def criar_ocorrencia():
     try:
         conn = get_db_connection()
         if not conn:
-            return jsonify({'sucesso': False, 'mensagem': 'Erro de ligação à base de dados'}), 500
+            return jsonify({'sucesso': False, 'mensagem': 'Erro de conexão com o banco de dados'}), 500
 
         cursor = conn.cursor()
 
-        data_relato = datetime.now(ZoneInfo("America/Sao_Paulo")).strftime('%Y-%m-%d %H:%M:%S')
-        #data_relato = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        data_relato = agora_sp().strftime('%Y-%m-%d %H:%M:%S')
 
         query = """
             INSERT INTO ocorrencia (id_ponto, tipo, descricao, data_relato) 
@@ -326,7 +341,7 @@ def criar_ocorrencia():
         cursor.execute(query, (id_ponto, tipo, descricao, data_relato))
         conn.commit()
 
-        return jsonify({'sucesso': True, 'mensagem': 'Ocorrência registada com sucesso!'})
+        return jsonify({'sucesso': True, 'mensagem': 'Ocorrência registrada com sucesso!'})
 
     except Exception as e:
         if conn:

@@ -98,7 +98,7 @@
 </head>
 <body>
 
-<!-- Botão flutuante visível apenas em telemóveis para abrir o menu -->
+<!-- Botão flutuante visível apenas em celulares para abrir o menu -->
 <button id="toggleMenuBtn" class="d-md-none">
     <i class="fa-solid fa-bars"></i> Menu & Filtros
 </button>
@@ -123,7 +123,7 @@
         <div id="weather-widget" style="display: flex; align-items: center; gap: 10px; background: #f1f8e9; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #c8e6c9;">
             <img id="weather-icon" src="" alt="Clima" style="width: 36px; height: 36px; display: none;">
             <div style="font-size: 13px; color: #2e7d32;">
-                <strong id="weather-temp">A carregar clima...</strong>
+                <strong id="weather-temp">Carregando clima...</strong>
                 <div id="weather-desc" style="font-size: 11px; color: #555; text-transform: capitalize;">São Paulo</div>
             </div>
         </div>
@@ -228,7 +228,7 @@
                 <label><input type="checkbox" id="novo-seguranca"> Possui Segurança</label>
             </div>
 
-            <button type="submit" class="btn-salvar" style="margin-top: 4px; padding: 8px;">Guardar Ponto</button>
+            <button type="submit" class="btn-salvar" style="margin-top: 4px; padding: 8px;">Salvar Ponto</button>
         </form>
     </div>
 
@@ -320,7 +320,7 @@
             <label style="font-weight: 600; font-size: 13px; color: #333;"><i class="fa-solid fa-shield"></i> Segurança:</label>
             <div class="checkbox-group" style="display: flex; flex-direction: column; gap: 6px;">
                 <label style="font-size: 13px; cursor: pointer;"><input type="checkbox" id="edit-vigilancia"> Vigilância Humana</label>
-                <label style="font-size: 13px; cursor: pointer;"><input type="checkbox" id="edit-cameras"> Câmera de Monitorização</label>
+                <label style="font-size: 13px; cursor: pointer;"><input type="checkbox" id="edit-cameras"> Câmera de Monitoramento</label>
             </div>
 
             <!-- Botões Salvar e Cancelar -->
@@ -337,11 +337,11 @@
 </div>
 
 
-<!-- Modal para Registar Ocorrência -->
+<!-- Modal para Registrar Ocorrência -->
 <div id="modal-ocorrencia" class="modal" style="display: none;">
     <div class="modal-conteudo">
         <span class="fechar-modal" onclick="fecharModalOcorrencia()">&times;</span>
-        <h2>Registar Ocorrência</h2>
+        <h2>Registrar Ocorrência</h2>
         <form id="form-ocorrencia">
             <input type="hidden" id="ocorrencia-ponto-id">
 
@@ -362,7 +362,7 @@
                 <div id="contador-caracteres" style="font-size: 11px; color: #666; text-align: right; margin-top: 2px;">0/1000</div>
             </div>
 
-            <button type="submit" class="btn-salvar">Guardar Ocorrência</button>
+            <button type="submit" class="btn-salvar">Salvar Ocorrência</button>
         </form>
     </div>
 </div>

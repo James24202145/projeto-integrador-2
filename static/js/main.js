@@ -85,7 +85,7 @@ function carregarGrafico(tipo, elementoBotao) {
         meuGrafico = new Chart(ctx, {
             type: 'pie',
             data: {
-                labels: ['Com Elemento de Segurança', 'Sem Segurança Registada'],
+                labels: ['Com Elemento de Segurança', 'Sem Segurança Registrada'],
                 datasets: [{
                     data: [comSeg, semSeg],
                     backgroundColor: ['#2e7d32', '#d32f2f']
@@ -127,7 +127,7 @@ function carregarGrafico(tipo, elementoBotao) {
             data: {
                 labels: ['Vandalismo', 'Lotado', 'Avaria Estrutural', 'Furto/Roubo', 'Fechado'],
                 datasets: [{
-                    label: 'Ocorrências Registadas',
+                    label: 'Ocorrências Registradas',
                     data: [2, 5, 3, 1, 4],
                     backgroundColor: '#e65100'
                 }]
@@ -276,9 +276,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const camadaMarcadores = L.layerGroup().addTo(map);
 
 
-    // Função de exclusão de ponto integrada no mesmo escopo para aceder a 'map' e 'renderizarPontos'
+    // Função de exclusão de ponto integrada no mesmo escopo para acessar 'map' e 'renderizarPontos'
     window.excluirPonto = function(idPonto) {
-        if (confirm('Tem certeza de que deseja eliminar este ponto de apoio? Todos os registos e ocorrências associados serão removidos permanentemente.')) {
+        if (confirm('Tem certeza de que deseja excluir este ponto de apoio? Todos os registros e ocorrências associados serão removidos permanentemente.')) {
             fetch(`/api/pontos/${idPonto}`, {
                 method: 'DELETE'
             })
@@ -288,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Fecha o popup aberto imediatamente
                     map.closePopup();
 
-                    alert('Ponto eliminado com sucesso!');
+                    alert('Ponto excluído com sucesso!');
 
                     // Recarrega os pontos no mapa para o ponto sumir de imediato sem F5
                     fetch('/api/pontos')
@@ -298,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             renderizarPontos(todosPontos);
                         });
                 } else {
-                    alert('Erro ao eliminar: ' + data.mensagem);
+                    alert('Erro ao excluir: ' + data.mensagem);
                 }
             })
             .catch(err => console.error('Erro na requisição:', err));
@@ -388,12 +388,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="popup-ocorrencias-container">
                         <h4>Últimas Ocorrências</h4>
                         <div id="lista-oc-${idPonto}" class="lista-ocorrencias-popup">
-                            <span class="sem-ocorrencias">A carregar...</span>
+                            <span class="sem-ocorrencias">Carregando...</span>
                         </div>
                     </div>
 
                     <button class="btn-ocorrencia" onclick="abrirModalOcorrencia(${idPonto})">
-                        <i class="fa-solid fa-triangle-exclamation"></i> Registar Ocorrência
+                        <i class="fa-solid fa-triangle-exclamation"></i> Registrar Ocorrência
                     </button>
                 </div>
             `;
@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(res => res.json())
             .then(data => {
                 if (data.sucesso) {
-                    alert('Ocorrência registada com sucesso!');
+                    alert('Ocorrência registrada com sucesso!');
                     fecharModalOcorrencia();
 
                     fetch('/api/pontos')
@@ -613,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         .catch(err => console.error('Erro ao recarregar pontos:', err));
 
                 } else {
-                    alert('Erro ao registar: ' + data.mensagem);
+                    alert('Erro ao registrar: ' + data.mensagem);
                 }
             })
             .catch(err => console.error('Erro na requisição:', err));
