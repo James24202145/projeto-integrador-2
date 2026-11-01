@@ -32,3 +32,5 @@ LIMITES_SAO_PAULO = '-46.826,-23.356,-46.365,-24.008'  # oeste, norte, leste, su
 
 # Chave do OpenWeatherMap, lida do .env (local) ou das variáveis de ambiente (Cloud Run)
 OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY')
+# Período exibido no gráfico de evolução temporal das ocorrências
+DIAS_EVOLUCAO_OCORRENCIAS = 30

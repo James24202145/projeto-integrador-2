@@ -5,8 +5,9 @@
 // Lista de pontos carregada da API
 let todosPontos = [];
 
-// Instância do Chart.js (permite destruir/recriar o gráfico)
+// Instância do Chart.js (permite destruir/recriar o gráfico) e aba selecionada no painel
 let meuGrafico = null;
+let graficoSelecionado = null;
 
 // Mapa Leaflet e camada onde os marcadores são desenhados
 let map = null;
@@ -30,6 +31,17 @@ const ESTILO_PIN_PADRAO = { classeCor: 'pin-padrao', iconeFa: 'fa-parking' };
 // Ocorrências que alteram a cor do pin
 const OCORRENCIAS_ALERTA_VERMELHO = ['Ponto de Apoio Fechado', 'Ponto de Apoio Lotado'];
 const OCORRENCIAS_ALERTA_AMARELO = ['Vandalismo', 'Avaria/Estrutura Danificada', 'Ocorrência de Furto/Roubo'];
+const COR_ALERTA_VERMELHO = '#d32f2f';
+const COR_ALERTA_AMARELO = '#fbc02d';
+
+// Tipos de ocorrência do formulário, com o nome curto usado nos gráficos
+const ROTULOS_OCORRENCIA = {
+    'Vandalismo': 'Vandalismo',
+    'Avaria/Estrutura Danificada': 'Avaria',
+    'Ocorrência de Furto/Roubo': 'Furto/Roubo',
+    'Ponto de Apoio Lotado': 'Lotado',
+    'Ponto de Apoio Fechado': 'Fechado'
+};
 
 
 // ==========================================
@@ -193,8 +205,12 @@ function fecharModalEstatisticas() {
 // 5. GRÁFICOS (Chart.js)
 // ==========================================
 
-function desenharGrafico(tipoGrafico, labels, dataset, titulo) {
+function desenharGrafico(tipoGrafico, labels, dataset, titulo, opcoesExtras = {}) {
     const ctx = document.getElementById('meuGraficoChart').getContext('2d');
+
+    if (meuGrafico) {
+        meuGrafico.destroy();
+    }
 
     meuGrafico = new Chart(ctx, {
         type: tipoGrafico,
@@ -202,10 +218,21 @@ function desenharGrafico(tipoGrafico, labels, dataset, titulo) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { title: { display: true, text: titulo } }
+            plugins: { title: { display: true, text: titulo } },
+            ...opcoesExtras
         }
     });
 }
+
+// Aviso sobre a área do gráfico quando não há dados para exibir (texto vazio esconde)
+function mostrarAvisoGrafico(texto) {
+    const aviso = document.getElementById('grafico-sem-dados');
+    aviso.textContent = texto;
+    aviso.hidden = !texto;
+}
+
+// Contagens são sempre inteiras: evita marcações como 0,5 no eixo
+const EIXO_CONTAGEM = { beginAtZero: true, ticks: { precision: 0 } };
 
 function graficoInfraestrutura() {
     const contagem = {};
@@ -254,13 +281,81 @@ function graficoVagas() {
     }, 'Capacidade Total de Vagas por Categoria');
 }
 
-// Exemplo demonstrativo para os gráficos baseados em ocorrências
-function graficoOcorrencias(titulo) {
-    desenharGrafico('bar', ['Vandalismo', 'Lotado', 'Avaria Estrutural', 'Furto/Roubo', 'Fechado'], {
-        label: 'Ocorrências Registradas',
-        data: [2, 5, 3, 1, 4],
-        backgroundColor: '#e65100'
-    }, titulo);
+// Situação de cada ponto pela última ocorrência, a mesma regra que colore os pins
+function graficoSituacaoPontos() {
+    let criticos = 0;
+    let atencao = 0;
+    todosPontos.forEach(p => {
+        if (OCORRENCIAS_ALERTA_VERMELHO.includes(p.ultima_ocorrencia_tipo)) criticos++;
+        else if (OCORRENCIAS_ALERTA_AMARELO.includes(p.ultima_ocorrencia_tipo)) atencao++;
+    });
+    const normais = todosPontos.length - criticos - atencao;
+
+    desenharGrafico('doughnut', [
+        'Sem alertas',
+        'Atenção (vandalismo, avaria ou furto)',
+        'Crítico (fechado ou lotado nas últimas 3h)'
+    ], {
+        data: [normais, atencao, criticos],
+        backgroundColor: ['#2e7d32', COR_ALERTA_AMARELO, COR_ALERTA_VERMELHO]
+    }, `Situação Atual dos ${todosPontos.length} Pontos de Apoio`);
+}
+
+// Busca os totais de ocorrências e desenha o gráfico só se a aba ainda estiver selecionada
+function carregarEstatisticasOcorrencias(aba, desenhar) {
+    fetch('/api/estatisticas/ocorrencias')
+        .then(res => res.json())
+        .then(dados => {
+            if (graficoSelecionado !== aba) return;
+            if (!dados.sucesso) throw new Error(dados.mensagem);
+            desenhar(dados);
+        })
+        .catch(() => {
+            if (graficoSelecionado === aba) {
+                mostrarAvisoGrafico('Não foi possível carregar as ocorrências. Tente novamente.');
+            }
+        });
+}
+
+function graficoTiposOcorrencia() {
+    carregarEstatisticasOcorrencias('ocorrencias_tipo', dados => {
+        // Todos os tipos aparecem, mesmo sem relatos; tipos fora do formulário entram no fim
+        const contagem = {};
+        Object.keys(ROTULOS_OCORRENCIA).forEach(tipo => { contagem[tipo] = 0; });
+        dados.por_tipo.forEach(linha => { contagem[linha.tipo] = linha.total; });
+        const tipos = Object.keys(contagem);
+
+        desenharGrafico('bar', tipos.map(tipo => ROTULOS_OCORRENCIA[tipo] || tipo), {
+            label: 'Ocorrências registradas',
+            data: tipos.map(tipo => contagem[tipo]),
+            backgroundColor: tipos.map(tipo =>
+                OCORRENCIAS_ALERTA_VERMELHO.includes(tipo) ? COR_ALERTA_VERMELHO : COR_ALERTA_AMARELO)
+        }, `Ocorrências por Tipo (${dados.total} no total)`, {
+            indexAxis: 'y',
+            scales: { x: EIXO_CONTAGEM }
+        });
+
+        if (dados.total === 0) mostrarAvisoGrafico('Nenhuma ocorrência registrada até agora.');
+    });
+}
+
+function graficoEvolucaoOcorrencias() {
+    carregarEstatisticasOcorrencias('ocorrencias_tempo', dados => {
+        const totalPeriodo = dados.por_dia.reduce((soma, dia) => soma + dia.total, 0);
+
+        desenharGrafico('line', dados.por_dia.map(dia => dia.data), {
+            label: 'Relatos no dia',
+            data: dados.por_dia.map(dia => dia.total),
+            borderColor: '#e65100',
+            backgroundColor: 'rgba(230, 81, 0, 0.15)',
+            fill: true,
+            tension: 0.3
+        }, `Relatos nos Últimos ${dados.por_dia.length} Dias (${totalPeriodo} no período)`, {
+            scales: { y: EIXO_CONTAGEM }
+        });
+
+        if (totalPeriodo === 0) mostrarAvisoGrafico('Nenhum relato registrado nos últimos 30 dias.');
+    });
 }
 
 const GRAFICOS = {
@@ -268,8 +363,9 @@ const GRAFICOS = {
     gratuidade: graficoGratuidade,
     seguranca: graficoSeguranca,
     vagas: graficoVagas,
-    ocorrencias_tipo: () => graficoOcorrencias('Incidência por Tipo de Ocorrência'),
-    ocorrencias_tempo: () => graficoOcorrencias('Evolução Temporal dos Relatos')
+    situacao: graficoSituacaoPontos,
+    ocorrencias_tipo: graficoTiposOcorrencia,
+    ocorrencias_tempo: graficoEvolucaoOcorrencias
 };
 
 function carregarGrafico(tipo, elementoBotao) {
@@ -280,8 +376,11 @@ function carregarGrafico(tipo, elementoBotao) {
 
     if (meuGrafico) {
         meuGrafico.destroy();
+        meuGrafico = null;
     }
 
+    graficoSelecionado = tipo;
+    mostrarAvisoGrafico('');
     const desenhar = GRAFICOS[tipo];
     if (desenhar) desenhar();
 }

@@ -297,11 +297,12 @@
         <span class="fechar-modal" onclick="fecharModalEstatisticas()">&times;</span>
         <h2><i class="fa-solid fa-chart-line"></i> Painel Estatístico & Análise da Rede</h2>
 
-        <!-- Barra Superior com os 6 Botões de Sugestão -->
+        <!-- Barra Superior com os Botões de Cada Gráfico -->
         <div class="botoes-graficos-container">
             <button class="btn-aba-grafico active" onclick="carregarGrafico('infraestrutura', this)">Infraestrutura</button>
             <button class="btn-aba-grafico" onclick="carregarGrafico('gratuidade', this)">Gratuidade x Cobertura</button>
             <button class="btn-aba-grafico" onclick="carregarGrafico('seguranca', this)">Segurança</button>
+            <button class="btn-aba-grafico" onclick="carregarGrafico('situacao', this)">Situação dos Pontos</button>
             <button class="btn-aba-grafico" onclick="carregarGrafico('ocorrencias_tipo', this)">Tipos de Ocorrência</button>
             <button class="btn-aba-grafico" onclick="carregarGrafico('ocorrencias_tempo', this)">Evolução Temporal</button>
             <button class="btn-aba-grafico" onclick="carregarGrafico('vagas', this)">Capacidade de Vagas</button>
@@ -310,6 +311,7 @@
         <!-- Área de Exibição do Gráfico -->
         <div class="area-grafico-container">
             <canvas id="meuGraficoChart"></canvas>
+            <p id="grafico-sem-dados" class="grafico-sem-dados" role="status" hidden></p>
         </div>
     </div>
 </div>
