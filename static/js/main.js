@@ -12,7 +12,12 @@ let meuGrafico = null;
 let map = null;
 let camadaMarcadores = null;
 
+// Destaque do endereço buscado e indicação de que o texto da busca é um endereço
+let camadaBuscaEndereco = null;
+let buscaPorEndereco = false;
+
 const CENTRO_SP = [-23.55052, -46.633309];
+const RAIO_PONTOS_PROXIMOS = 500; // metros
 
 // Cor e ícone do pin de acordo com o tipo do ponto
 const ESTILO_PIN_POR_TIPO = {
@@ -467,14 +472,15 @@ function excluirPonto(idPonto) {
 // 8. FILTROS E BUSCA
 // ==========================================
 
-function aplicarFiltros() {
-    const textoBusca = document.getElementById('input-busca').value.toLowerCase();
+// Pontos que atendem aos filtros. Depois de uma busca de endereço, o texto não filtra por nome
+function filtrarPontos() {
+    const textoBusca = buscaPorEndereco ? '' : document.getElementById('input-busca').value.toLowerCase();
     const tipoSelecionado = document.getElementById('select-tipo').value;
     const apenasGratuito = document.getElementById('check-gratuito').checked;
     const apenasCoberto = document.getElementById('check-coberto').checked;
     const apenasSeguranca = document.getElementById('check-seguranca').checked;
 
-    const filtrados = todosPontos.filter(ponto => {
+    return todosPontos.filter(ponto => {
         const atendeTexto = ponto.nome.toLowerCase().includes(textoBusca) ||
                             ponto.endereco.toLowerCase().includes(textoBusca);
 
@@ -485,13 +491,14 @@ function aplicarFiltros() {
 
         return atendeTexto && atendeTipo && atendeGratuito && atendeCoberto && atendeSeguranca;
     });
+}
 
-    renderizarPontos(filtrados);
+function aplicarFiltros() {
+    renderizarPontos(filtrarPontos());
 }
 
 function inicializarFiltros() {
     const campos = [
-        ['input-busca', 'input'],
         ['select-tipo', 'change'],
         ['check-gratuito', 'change'],
         ['check-coberto', 'change'],
@@ -506,7 +513,172 @@ function inicializarFiltros() {
 
 
 // ==========================================
-// 9. FORMULÁRIOS
+// 9. BUSCA DE ENDEREÇO
+// ==========================================
+
+// Mostra o resultado sobre o mapa; a região aria-live faz o leitor de tela anunciá-lo
+function mostrarAvisoBusca(texto, erro) {
+    const aviso = document.getElementById('aviso-busca');
+    aviso.classList.toggle('erro', !!erro);
+    aviso.classList.add('visivel');
+    document.getElementById('aviso-busca-texto').textContent = texto;
+}
+
+function fecharAvisoBusca() {
+    document.getElementById('aviso-busca').classList.remove('visivel', 'erro');
+    document.getElementById('aviso-busca-texto').textContent = '';
+}
+
+function limparDestaqueBusca() {
+    if (camadaBuscaEndereco) {
+        map.removeLayer(camadaBuscaEndereco);
+        camadaBuscaEndereco = null;
+    }
+}
+
+// Marca o endereço com um pin próprio e um círculo do raio considerado "próximo"
+function destacarEnderecoBuscado(latlng, endereco) {
+    limparDestaqueBusca();
+
+    const circulo = L.circle(latlng, {
+        radius: RAIO_PONTOS_PROXIMOS,
+        color: '#6a1b9a',
+        weight: 2,
+        fillOpacity: 0.08
+    });
+
+    const rotulo = document.createElement('span');
+    rotulo.textContent = endereco;
+
+    const marcador = L.marker(latlng, {
+        zIndexOffset: 1000,
+        keyboard: false,
+        icon: L.divIcon({
+            className: 'custom-pin-wrapper',
+            html: '<div class="custom-pin pin-endereco-busca"><i class="fa-solid fa-location-dot"></i></div>',
+            iconSize: [34, 34],
+            iconAnchor: [17, 34]
+        })
+    }).bindTooltip(rotulo, { permanent: true, direction: 'top', offset: [0, -34] });
+
+    camadaBuscaEndereco = L.layerGroup([circulo, marcador]).addTo(map);
+    return circulo.getBounds();
+}
+
+// Pontos ordenados pela distância (em metros) até o endereço
+function ordenarPorDistancia(latlng, pontos) {
+    return pontos
+        .map(p => ({ ponto: p, distancia: map.distance(latlng, [p.latitude, p.longitude]) }))
+        .sort((a, b) => a.distancia - b.distancia);
+}
+
+function formatarDistancia(metros) {
+    return metros < 1000
+        ? `${Math.round(metros / 10) * 10} m`
+        : `${(metros / 1000).toFixed(1).replace('.', ',')} km`;
+}
+
+// Quando o texto é o nome de um ponto, mostra esses pontos em vez de buscar um endereço
+function mostrarPontosPorNome(termo) {
+    const texto = termo.toLowerCase();
+    const pontos = filtrarPontos().filter(p => p.nome.toLowerCase().includes(texto));
+    if (pontos.length === 0) return false;
+
+    limparDestaqueBusca();
+    map.fitBounds(L.latLngBounds(pontos.map(p => [p.latitude, p.longitude])), { maxZoom: 16, padding: [40, 40] });
+
+    const lista = pontos.slice(0, 3).map(p => p.nome).join(', ') + (pontos.length > 3 ? ` e mais ${pontos.length - 3}` : '');
+    const quantidade = pontos.length === 1 ? '1 ponto encontrado pelo nome' : `${pontos.length} pontos encontrados pelo nome`;
+    mostrarAvisoBusca(`${quantidade}: ${lista}. Para buscar um endereço, digite a rua completa.`);
+    return true;
+}
+
+function buscarEndereco(termo) {
+    const botao = document.getElementById('btn-buscar-endereco');
+
+    if (!termo) {
+        mostrarAvisoBusca('Digite um endereço para buscar.', true);
+        return;
+    }
+
+    if (mostrarPontosPorNome(termo)) return;
+
+    botao.disabled = true;
+    mostrarAvisoBusca('Buscando endereço...');
+
+    fetch(`/api/geocodificar?q=${encodeURIComponent(termo)}`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.sucesso) {
+                limparDestaqueBusca();
+                mostrarAvisoBusca('Endereço não encontrado em São Paulo. Confira o nome da rua ou acrescente o bairro.', true);
+                return;
+            }
+
+            // O texto digitado passa a valer como endereço, então volta a mostrar todos os pontos
+            buscaPorEndereco = true;
+            const pontosVisiveis = filtrarPontos();
+            renderizarPontos(pontosVisiveis);
+
+            const latlng = L.latLng(data.latitude, data.longitude);
+            const enquadramento = destacarEnderecoBuscado(latlng, data.endereco);
+
+            const ordenados = ordenarPorDistancia(latlng, pontosVisiveis);
+            const proximos = ordenados.filter(item => item.distancia <= RAIO_PONTOS_PROXIMOS).length;
+            let textoProximos;
+
+            if (proximos > 0) {
+                textoProximos = `${proximos} ${proximos === 1 ? 'ponto de apoio' : 'pontos de apoio'} a até ${RAIO_PONTOS_PROXIMOS} m.`;
+            } else if (ordenados.length > 0) {
+                // Nenhum ponto no raio: indica o mais próximo e o inclui no enquadramento do mapa
+                const maisProximo = ordenados[0];
+                enquadramento.extend([maisProximo.ponto.latitude, maisProximo.ponto.longitude]);
+                textoProximos = `Nenhum ponto de apoio a até ${RAIO_PONTOS_PROXIMOS} m. O mais próximo é ${maisProximo.ponto.nome}, a ${formatarDistancia(maisProximo.distancia)}.`;
+            } else {
+                textoProximos = 'Nenhum ponto de apoio atende aos filtros selecionados.';
+            }
+
+            map.fitBounds(enquadramento, { padding: [40, 40] });
+            mostrarAvisoBusca(`Endereço encontrado: ${data.endereco}. ${textoProximos}`);
+
+            // No celular, recolhe o menu para o resultado ficar visível no mapa
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebarPanel').classList.add('mobile-hidden');
+            }
+        })
+        .catch(err => {
+            console.error('Erro ao buscar endereço:', err);
+            mostrarAvisoBusca('Não foi possível buscar o endereço agora. Tente novamente.', true);
+        })
+        .finally(() => {
+            botao.disabled = false;
+        });
+}
+
+function inicializarBusca() {
+    const formBusca = document.getElementById('form-busca');
+    const inputBusca = document.getElementById('input-busca');
+    if (!formBusca || !inputBusca) return;
+
+    // Ao digitar, volta a filtrar os pontos por nome ou endereço, como antes
+    inputBusca.addEventListener('input', () => {
+        buscaPorEndereco = false;
+        limparDestaqueBusca();
+        fecharAvisoBusca();
+        aplicarFiltros();
+    });
+
+    formBusca.addEventListener('submit', (e) => {
+        e.preventDefault();
+        buscarEndereco(inputBusca.value.trim());
+    });
+
+    document.getElementById('btn-fechar-aviso-busca').addEventListener('click', fecharAvisoBusca);
+}
+
+
+// ==========================================
+// 10. FORMULÁRIOS
 // ==========================================
 
 // Fluxo em duas etapas para novo ponto (coordenadas via clique no mapa)
@@ -712,7 +884,7 @@ function inicializarFormOcorrencia() {
 
 
 // ==========================================
-// 10. INICIALIZAÇÃO
+// 11. INICIALIZAÇÃO
 // ==========================================
 
 carregarClima();
@@ -720,6 +892,7 @@ carregarClima();
 document.addEventListener('DOMContentLoaded', () => {
     inicializarMapa();
     inicializarFiltros();
+    inicializarBusca();
     inicializarFluxoNovoPonto();
     inicializarFormNovoPonto();
     inicializarFormEdicao();

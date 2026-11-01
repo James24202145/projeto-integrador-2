@@ -25,5 +25,10 @@ NATUREZA_OPERADOR_COLABORATIVO = 'Colaborativo / Usuários'
 LATITUDE_PADRAO = '-23.55052'
 LONGITUDE_PADRAO = '-46.633309'
 
+# Busca de endereços no Nominatim (OpenStreetMap), limitada ao município de São Paulo
+URL_NOMINATIM_BUSCA = 'https://nominatim.openstreetmap.org/search'
+USER_AGENT_NOMINATIM = 'Cicloponto-Projeto-PI2-SP'
+LIMITES_SAO_PAULO = '-46.826,-23.356,-46.365,-24.008'  # oeste, norte, leste, sul
+
 # Chave do OpenWeatherMap, lida do .env (local) ou das variáveis de ambiente (Cloud Run)
 OPENWEATHER_API_KEY = os.environ.get('OPENWEATHER_API_KEY')

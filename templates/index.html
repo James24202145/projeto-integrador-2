@@ -54,10 +54,14 @@
             </div>
         </div>
 
-        <div class="search-box">
+        <!-- Digitar filtra os pontos; Enter ou o botão buscam o endereço no mapa -->
+        <form id="form-busca" class="search-box" role="search">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="input-busca" placeholder="Buscar por nome ou endereço...">
-        </div>
+            <input type="text" id="input-busca" placeholder="Buscar por nome ou endereço..." aria-label="Buscar por nome do ponto ou endereço" autocomplete="street-address">
+            <button type="submit" id="btn-buscar-endereco" class="btn-buscar-endereco" aria-label="Buscar endereço no mapa" title="Buscar endereço no mapa">
+                <i class="fa-solid fa-location-arrow"></i>
+            </button>
+        </form>
 
         <div class="filter-section">
             <label class="filter-title">Filtros</label>
@@ -167,6 +171,13 @@
 </div>
 <!-- Container do Mapa -->
 <div id="map"></div>
+
+<!-- Resultado da busca de endereço (anunciado por leitores de tela) -->
+<div id="aviso-busca" class="aviso-busca" role="status" aria-live="polite">
+    <i class="fa-solid fa-location-dot aviso-busca-icone" aria-hidden="true"></i>
+    <span id="aviso-busca-texto"></span>
+    <button type="button" id="btn-fechar-aviso-busca" class="aviso-busca-fechar" aria-label="Fechar aviso da busca">&times;</button>
+</div>
 
 <!-- Legenda Fixa na Base -->
 
