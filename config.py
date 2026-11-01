@@ -17,8 +17,9 @@ JANELA_LOTADO = timedelta(hours=3)
 # Formato usado para gravar datas nas colunas DATETIME do MySQL
 FORMATO_DATA_MYSQL = '%Y-%m-%d %H:%M:%S'
 
-# Operador atribuído aos pontos cadastrados pela interface
-ID_OPERADOR_PADRAO = 10
+# Operador atribuído aos pontos cadastrados pela interface (criado automaticamente se não existir)
+NOME_OPERADOR_COLABORATIVO = 'Cadastro Colaborativo'
+NATUREZA_OPERADOR_COLABORATIVO = 'Colaborativo / Usuários'
 
 # Coordenadas padrão centradas em São Paulo / Região Metropolitana
 LATITUDE_PADRAO = '-23.55052'

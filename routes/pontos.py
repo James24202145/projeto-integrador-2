@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 
-from config import ID_OPERADOR_PADRAO
+from config import NOME_OPERADOR_COLABORATIVO, NATUREZA_OPERADOR_COLABORATIVO
 from db import get_db_connection, fechar_conexao
 from utils import agora_sp_formatado, limite_lotado
 
@@ -53,6 +53,10 @@ QUERY_INSERIR_PONTO = """
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'Ativo', %s, %s);
 """
 
+QUERY_BUSCAR_OPERADOR = "SELECT id_operador FROM operador WHERE nome = %s LIMIT 1;"
+
+QUERY_INSERIR_OPERADOR = "INSERT INTO operador (nome, natureza) VALUES (%s, %s);"
+
 QUERY_INSERIR_SEGURANCA = """
     INSERT INTO seguranca (vigilancia_humana, cameras, seguro_contra_furto, nivel_avaliado, id_ponto)
     VALUES (%s, 0, 0, 0, %s);
@@ -73,6 +77,17 @@ QUERY_ATUALIZAR_SEGURANCA = """
         cameras = %s
     WHERE id_ponto = %s
 """
+
+
+def obter_id_operador_colaborativo(cursor):
+    """Retorna o operador dos pontos cadastrados pelos usuários, criando-o se ainda não existir."""
+    cursor.execute(QUERY_BUSCAR_OPERADOR, (NOME_OPERADOR_COLABORATIVO,))
+    resultado = cursor.fetchone()
+    if resultado:
+        return resultado[0]
+
+    cursor.execute(QUERY_INSERIR_OPERADOR, (NOME_OPERADOR_COLABORATIVO, NATUREZA_OPERADOR_COLABORATIVO))
+    return cursor.lastrowid
 
 
 # Rota da API REST para listar os pontos de apoio
@@ -129,9 +144,11 @@ def criar_ponto():
 
         cursor = conn.cursor()
 
+        id_operador = obter_id_operador_colaborativo(cursor)
+
         cursor.execute(QUERY_INSERIR_PONTO,
                        (nome, endereco, latitude, longitude, tipo, capacidade_vagas, gratuito, coberto,
-                        agora_sp_formatado(), ID_OPERADOR_PADRAO))
+                        agora_sp_formatado(), id_operador))
 
         # Insere na tabela seguranca usando o valor obtido do checkbox para vigilancia_humana
         cursor.execute(QUERY_INSERIR_SEGURANCA, (vigilancia_humana, cursor.lastrowid))

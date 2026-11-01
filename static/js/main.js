@@ -559,6 +559,71 @@ function inicializarFluxoNovoPonto() {
     }
 }
 
+// Volta o fluxo de novo ponto ao passo 1, sem localização selecionada
+function reiniciarFluxoNovoPonto() {
+    const formPonto = document.getElementById('form-novo-ponto');
+    const btnProximo = document.getElementById('btn-proximo-passo');
+
+    formPonto.reset();
+    formPonto.style.display = 'none';
+    document.getElementById('novo-passo-1').style.display = 'block';
+    document.getElementById('novo-lat').value = '';
+    document.getElementById('novo-lng').value = '';
+
+    btnProximo.setAttribute('disabled', '');
+    btnProximo.style.backgroundColor = '#ccc';
+    btnProximo.style.cursor = 'not-allowed';
+}
+
+// Submissão do formulário de novo ponto
+function inicializarFormNovoPonto() {
+    const formPonto = document.getElementById('form-novo-ponto');
+    if (!formPonto) return;
+
+    formPonto.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const valor = id => document.getElementById(id).value;
+        const marcado = id => document.getElementById(id).checked;
+        const latitude = parseFloat(valor('novo-lat'));
+        const longitude = parseFloat(valor('novo-lng'));
+
+        const novoPonto = {
+            nome: valor('novo-nome').trim(),
+            tipo: valor('novo-tipo'),
+            endereco: valor('novo-endereco').trim(),
+            latitude: latitude,
+            longitude: longitude,
+            capacidade_vagas: parseInt(valor('novo-vagas')) || 0,
+            gratuito: marcado('novo-gratuito'),
+            coberto: marcado('novo-coberto'),
+            seguranca: marcado('novo-seguranca')
+        };
+
+        fetch('/api/pontos/novo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(novoPonto)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.sucesso) {
+                alert('Ponto de apoio adicionado com sucesso!');
+                reiniciarFluxoNovoPonto();
+                mudarAba('explorar');
+
+                // Recarrega os pontos, reaplica os filtros e mostra o novo ponto
+                recarregarPontos().then(() => {
+                    aplicarFiltros();
+                    map.setView([latitude, longitude], 17);
+                });
+            } else {
+                alert('Erro ao salvar: ' + data.mensagem);
+            }
+        })
+        .catch(err => console.error('Erro ao salvar ponto:', err));
+    });
+}
+
 // Submissão do formulário de edição
 function inicializarFormEdicao() {
     const formEditar = document.getElementById('form-editar-ponto');
@@ -656,6 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarMapa();
     inicializarFiltros();
     inicializarFluxoNovoPonto();
+    inicializarFormNovoPonto();
     inicializarFormEdicao();
     inicializarFormOcorrencia();
     inicializarMenuMobile();
