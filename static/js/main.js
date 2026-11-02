@@ -481,16 +481,16 @@ function montarPopupHtml(ponto, idPonto) {
                 <a href="https://www.google.com/maps/dir/?api=1&destination=${ponto.latitude},${ponto.longitude}&travelmode=bicycling"
                    target="_blank"
                    title="Traçar rota de bicicleta no Google Maps"
-                   style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 14px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                   style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 18px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <i class="fa-solid fa-person-biking"></i>
                 </a>
             </div>
             <!-- Ações: Editar e Excluir lado a lado -->
-            <div style="display: flex; gap: 12px; margin-bottom: 8px;">
-                <button onclick="abrirModalEdicao(${idPonto})" style="background: none; border: none; color: #0288d1; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
+            <div style="display: flex; gap: 12px; margin-bottom: 4px;">
+                <button class="popup-acao" onclick="abrirModalEdicao(${idPonto})" style="background: none; border: none; color: #0288d1; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
                     <i class="fa-solid fa-pen-to-square"></i> Editar Ponto
                 </button>
-                <button onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
+                <button class="popup-acao" onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
                     <i class="fa-solid fa-trash-can"></i> Excluir Ponto
                 </button>
             </div>

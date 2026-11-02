@@ -3,8 +3,8 @@
     position: fixed;
     bottom: 60px; /* Sobe o botão para ficar acima da legenda (que fica na base) */
     right: 10px;  /* Ajustado para 10px para alinhar com o botão de tema e o painel A/A+/A++ */
-    width: 42px;  /* Tamanho ajustado para harmonizar com o botão do tema */
-    height: 42px;
+    width: 44px;  /* Área de toque mínima (F1.6), igual à do botão do tema */
+    height: 44px;
     border-radius: 50%;
     background-color: #2e7d32;
     color: white;
@@ -318,17 +318,20 @@ body, html {
     z-index: 1;
 }
 /* Adaptação do Seletor de Fontes para o Modo Escuro */
+body.dark-mode .seletor-fonte,
 body.dark-mode div[style*="background: white;"],
 body.dark-mode div[style*="background: #ffffff;"] {
     background-color: #1e1e1e !important;
     box-shadow: 0 2px 5px rgba(0,0,0,0.6) !important;
 }
 
+body.dark-mode .seletor-fonte button,
 body.dark-mode div[style*="background: white;"] button,
 body.dark-mode div[style*="background: #ffffff;"] button {
     color: #e0e0e0 !important;
 }
 
+body.dark-mode .seletor-fonte button:hover,
 body.dark-mode div[style*="background: white;"] button:hover,
 body.dark-mode div[style*="background: #ffffff;"] button:hover {
     background-color: #2d2d2d !important;
@@ -932,4 +935,137 @@ body.dark-mode .aviso-busca {
 
 body.dark-mode .aviso-busca.erro {
     color: #ef9a9a;
+}
+
+
+/* ==========================================
+   ÁREA DE TOQUE (F1.6)
+   Controles principais com no mínimo 44 x 44 px (WCAG 2.5.5)
+   ========================================== */
+:root {
+    --area-toque: 44px;
+}
+
+/* Seletor de tamanho de fonte (A, A+, A++) */
+.seletor-fonte {
+    position: absolute;
+    top: 68px;
+    right: 10px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: white;
+    padding: 3px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+}
+
+.btn-fonte {
+    width: var(--area-toque);
+    height: var(--area-toque);
+    background: none;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-fonte:hover {
+    background-color: #e8f5e9;
+}
+
+/* Zoom do mapa */
+.leaflet-touch .leaflet-bar a,
+.leaflet-bar a {
+    width: var(--area-toque);
+    height: var(--area-toque);
+    line-height: var(--area-toque);
+    font-size: 22px;
+}
+
+/* Menu, abas e campos da barra lateral */
+#toggleMenuBtn,
+.tab-btn,
+.sidebar select,
+.modal select {
+    min-height: var(--area-toque);
+}
+
+.btn-close-mobile,
+.aviso-busca-fechar {
+    min-width: var(--area-toque);
+    min-height: var(--area-toque);
+}
+
+/* Filtros e opções: a linha inteira do rótulo é clicável */
+.checkbox-group {
+    gap: 4px;
+}
+
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: var(--area-toque);
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* Botão fechar das janelas */
+.fechar-modal {
+    top: 4px;
+    right: 4px;
+    width: var(--area-toque);
+    height: var(--area-toque);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+}
+
+/* Fechar a ficha do ponto (popup do Leaflet) */
+.leaflet-container a.leaflet-popup-close-button {
+    width: var(--area-toque);
+    height: var(--area-toque);
+    font-size: 26px;
+    line-height: var(--area-toque);
+    top: 0;
+    right: 0;
+}
+
+/* Ações da ficha do ponto */
+.popup-content .popup-acao {
+    min-height: var(--area-toque);
+    padding: 0 4px !important;
+}
+
+.btn-ocorrencia,
+.btn-salvar,
+#btn-voltar-passo-1,
+.item-ocorrencia-popup {
+    min-height: var(--area-toque);
+}
+
+/* Botões do painel estatístico */
+.btn-aba-grafico {
+    min-height: var(--area-toque);
+}
+
+/* Espaço entre o zoom do mapa e o botão do menu */
+#toggleMenuBtn {
+    left: 74px;
+}
+
+/* No celular a legenda ocupa duas linhas: o botão de estatísticas fica acima dela */
+@media (max-width: 768px) {
+    #btn-estatisticas {
+        bottom: 100px;
+    }
 }
