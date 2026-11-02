@@ -1218,3 +1218,45 @@ button.item-ocorrencia-popup {
 h2.filter-title {
     margin: 0;
 }
+
+/* ==========================================
+   BOTÃO OUVIR DA FICHA (F1.7)
+   ========================================== */
+.btn-ouvir {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: var(--area-toque);
+    margin: 4px 0;
+    background-color: #e8f5e9;
+    color: #1b5e20;
+    border: 2px solid #2e7d32;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-ouvir:hover {
+    background-color: #c8e6c9;
+}
+
+/* Lendo: botão preenchido, com o texto "Parar" */
+.btn-ouvir[aria-pressed="true"] {
+    background-color: #2e7d32;
+    color: #ffffff;
+}
+
+body.dark-mode .btn-ouvir {
+    background-color: #1a2e1b;
+    color: #a5d6a7 !important;
+    border-color: #66bb6a;
+}
+
+body.dark-mode .btn-ouvir[aria-pressed="true"] {
+    background-color: #66bb6a;
+    color: #0d1f0e !important;
+}

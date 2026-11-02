@@ -561,7 +561,10 @@ function inicializarMapa() {
         const titulo = elementoFicha.querySelector('.popup-titulo');
         if (titulo) titulo.focus();
     });
-    map.on('popupclose', () => document.body.classList.remove('ficha-aberta'));
+    map.on('popupclose', () => {
+        document.body.classList.remove('ficha-aberta');
+        pararLeituraPonto();
+    });
 }
 
 // Alerta do ponto de acordo com a última ocorrência (null quando não há alerta)
@@ -626,6 +629,8 @@ function montarPopupHtml(ponto, idPonto) {
                     <i class="fa-solid fa-trash-can" aria-hidden="true"></i> Excluir Ponto
                 </button>
             </div>
+
+            ${montarBotaoOuvirHtml(idPonto)}
 
             <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> ${ponto.endereco}</p>
             <p><i class="fa-solid fa-shield" aria-hidden="true"></i> <strong>Segurança:</strong> ${ponto.seguranca_geral ? 'Sim' : 'Não'}</p>
@@ -736,6 +741,90 @@ function excluirPonto(idPonto) {
             }
         })
         .catch(err => console.error('Erro na requisição:', err));
+}
+
+
+// ==========================================
+// 7.1 LEITURA EM VOZ ALTA DA FICHA (Web Speech API)
+// ==========================================
+
+// Sem suporte no navegador, o botão Ouvir simplesmente não aparece
+const SUPORTA_LEITURA = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+
+// Fala em andamento: o fim de uma fala cancelada chega depois e não pode mexer no botão da nova
+let falaAtual = null;
+
+function montarBotaoOuvirHtml(idPonto) {
+    if (!SUPORTA_LEITURA) return '';
+
+    return `
+            <button type="button" class="btn-ouvir" aria-pressed="false" onclick="alternarLeituraPonto(this, ${idPonto})">
+                <i class="fa-solid fa-volume-high" aria-hidden="true"></i> <span>Ouvir</span>
+            </button>`;
+}
+
+function simOuNao(valor) {
+    return ehVerdadeiro(valor) ? 'sim' : 'não';
+}
+
+// Texto falado: nome, tipo, endereço, vagas, gratuidade, cobertura, segurança e alerta
+function montarTextoLeitura(ponto) {
+    const partes = [
+        `${ponto.nome}.`,
+        `Tipo: ${ponto.tipo}.`,
+        `Endereço: ${ponto.endereco}.`,
+        `Vagas: ${ponto.capacidade_vagas || 'não informado'}.`,
+        `Gratuito: ${simOuNao(ponto.gratuito)}.`,
+        `Coberto: ${simOuNao(ponto.coberto)}.`,
+        `Vigilância humana: ${simOuNao(ponto.vigilancia_humana)}.`,
+        `Câmera: ${simOuNao(ponto.cameras)}.`
+    ];
+
+    const alerta = obterAlerta(ponto.ultima_ocorrencia_tipo);
+    if (alerta) partes.push(`${alerta.rotulo}: última ocorrência registrada foi ${ponto.ultima_ocorrencia_tipo}.`);
+
+    return partes.join(' ');
+}
+
+function atualizarBotaoOuvir(botao, falando) {
+    botao.setAttribute('aria-pressed', falando);
+    botao.querySelector('span').textContent = falando ? 'Parar' : 'Ouvir';
+    botao.querySelector('i').className = falando ? 'fa-solid fa-stop' : 'fa-solid fa-volume-high';
+}
+
+// Interrompe qualquer leitura e devolve os botões ao estado "Ouvir"
+function pararLeituraPonto() {
+    if (!SUPORTA_LEITURA) return;
+    falaAtual = null;
+    window.speechSynthesis.cancel();
+    document.querySelectorAll('.btn-ouvir').forEach(botao => atualizarBotaoOuvir(botao, false));
+}
+
+// O mesmo botão alterna entre Ouvir e Parar
+function alternarLeituraPonto(botao, idPonto) {
+    const falando = botao.getAttribute('aria-pressed') === 'true';
+    pararLeituraPonto();
+    if (falando) return;
+
+    const ponto = todosPontos.find(p => (p.id_ponto || p.id) == idPonto);
+    if (!ponto) return;
+
+    const fala = new SpeechSynthesisUtterance(montarTextoLeitura(ponto));
+    fala.lang = 'pt-BR';
+    const vozPortugues = window.speechSynthesis.getVoices().find(voz => voz.lang.replace('_', '-') === 'pt-BR');
+    if (vozPortugues) fala.voice = vozPortugues;
+
+    const aoTerminar = () => {
+        if (falaAtual !== fala) return;
+        falaAtual = null;
+        atualizarBotaoOuvir(botao, false);
+    };
+    fala.onend = aoTerminar;
+    fala.onerror = aoTerminar;
+
+    falaAtual = fala;
+    atualizarBotaoOuvir(botao, true);
+    window.speechSynthesis.speak(fala);
 }
 
 
@@ -1161,6 +1250,9 @@ function inicializarFormOcorrencia() {
 // Aplicado antes de a página terminar de carregar, para não piscar no tamanho padrão
 restaurarTamanhoFonte();
 carregarClima();
+
+// O Chrome carrega a lista de vozes sob demanda: pedir agora deixa a voz em português pronta
+if (SUPORTA_LEITURA) window.speechSynthesis.getVoices();
 
 document.addEventListener('DOMContentLoaded', () => {
     inicializarMapa();
