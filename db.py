@@ -21,11 +21,11 @@ def get_db_connection():
                 unix_socket=unix_socket_path
             )
         else:
-            # Conexão local para testes no seu computador (Lê do .env ou usa os padrões locais)
+            # Conexão local para testes no seu computador (lê do .env; a senha não tem valor padrão)
             conn = mysql.connector.connect(
                 host=os.environ.get('DB_HOST', 'localhost'),
                 user=os.environ.get('DB_USER', 'root'),
-                password=os.environ.get('DB_PASS') or os.environ.get('DB_PASSWORD', 'Lu182JmS7'),
+                password=os.environ.get('DB_PASS') or os.environ.get('DB_PASSWORD'),
                 database=os.environ.get('DB_NAME', 'cicloponto')
             )
 
