@@ -17,29 +17,29 @@
 <body>
 
 <!-- Botão flutuante visível apenas em celulares para abrir o menu -->
-<button id="toggleMenuBtn" class="d-md-none">
-    <i class="fa-solid fa-bars"></i> Menu & Filtros
+<button id="toggleMenuBtn" class="d-md-none" aria-expanded="false" aria-controls="sidebarPanel">
+    <i class="fa-solid fa-bars" aria-hidden="true"></i> Menu & Filtros
 </button>
 
 <!-- Painel Lateral Flutuante -->
-<div class="sidebar" id="sidebarPanel">
+<div class="sidebar" id="sidebarPanel" role="region" aria-label="Menu e filtros">
     <!-- Botão de Fechar no topo do painel para dispositivos móveis -->
     <div class="d-flex justify-content-end d-md-none" style="padding: 5px 5px 0 0;">
-        <button id="closeMenuBtn" class="btn-close btn-close-mobile" aria-label="Fechar" style="background: none; border: none; font-size: 1.125rem; cursor: pointer; color: #666;"><i class="fa-solid fa-xmark"></i></button>
+        <button id="closeMenuBtn" class="btn-close btn-close-mobile" aria-label="Fechar menu" style="background: none; border: none; font-size: 1.125rem; cursor: pointer; color: #666;"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
     </div>
 
     <!-- Abas do Painel -->
-    <div class="sidebar-tabs">
-        <button class="tab-btn active" onclick="mudarAba('explorar')"><i class="fa-solid fa-map"></i> Explorar</button>
-        <button class="tab-btn" onclick="mudarAba('adicionar')"><i class="fa-solid fa-plus-circle"></i> Novo Ponto</button>
+    <div class="sidebar-tabs" role="tablist" aria-label="Seções do menu">
+        <button class="tab-btn active" id="aba-btn-explorar" role="tab" aria-selected="true" aria-controls="aba-explorar" onclick="mudarAba('explorar')"><i class="fa-solid fa-map" aria-hidden="true"></i> Explorar</button>
+        <button class="tab-btn" id="aba-btn-adicionar" role="tab" aria-selected="false" aria-controls="aba-adicionar" onclick="mudarAba('adicionar')"><i class="fa-solid fa-plus-circle" aria-hidden="true"></i> Novo Ponto</button>
     </div>
 
     <!-- CONTEÚDO DA ABA: EXPLORAR -->
-    <div id="aba-explorar" class="tab-conteudo">
+    <div id="aba-explorar" class="tab-conteudo" role="tabpanel" aria-labelledby="aba-btn-explorar">
 
         <!-- Widget de Clima -->
         <div id="weather-widget" style="display: flex; align-items: center; gap: 10px; background: #f1f8e9; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #c8e6c9;">
-            <img id="weather-icon" src="" alt="Clima" style="width: 36px; height: 36px; display: none;">
+            <img id="weather-icon" src="" alt="" style="width: 36px; height: 36px; display: none;">
             <div style="font-size: 0.8125rem; color: #2e7d32;">
                 <strong id="weather-temp">Carregando clima...</strong>
                 <div id="weather-desc" style="font-size: 0.6875rem; color: #555; text-transform: capitalize;">São Paulo</div>
@@ -47,7 +47,7 @@
         </div>
 
         <div class="brand">
-            <i class="fa-solid fa-bicycle brand-icon"></i>
+            <i class="fa-solid fa-bicycle brand-icon" aria-hidden="true"></i>
             <div>
                 <h1>CicloPonto</h1>
                 <p>Pontos de apoio cicloviários em SP</p>
@@ -56,15 +56,15 @@
 
         <!-- Digitar filtra os pontos; Enter ou o botão buscam o endereço no mapa -->
         <form id="form-busca" class="search-box" role="search">
-            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
             <input type="text" id="input-busca" placeholder="Buscar por nome ou endereço..." aria-label="Buscar por nome do ponto ou endereço" autocomplete="street-address">
             <button type="submit" id="btn-buscar-endereco" class="btn-buscar-endereco" aria-label="Buscar endereço no mapa" title="Buscar endereço no mapa">
-                <i class="fa-solid fa-location-arrow"></i>
+                <i class="fa-solid fa-location-arrow" aria-hidden="true"></i>
             </button>
         </form>
 
         <div class="filter-section">
-            <label class="filter-title">Filtros</label>
+            <h2 class="filter-title">Filtros</h2>
 
             <div class="form-group">
                 <label for="select-tipo">Tipo de Ponto:</label>
@@ -88,12 +88,12 @@
     </div>
 
     <!-- CONTEÚDO DA ABA: ADICIONAR NOVO PONTO -->
-    <div id="aba-adicionar" class="tab-conteudo" style="display: none;">
+    <div id="aba-adicionar" class="tab-conteudo" role="tabpanel" aria-labelledby="aba-btn-adicionar" style="display: none;">
 
         <!-- PASSO 1: Seleção de Coordenadas no Mapa -->
         <div id="novo-passo-1">
             <div style="margin-bottom: 12px;">
-                <h2 style="font-size: 1rem; color: #2e7d32; margin-bottom: 4px;"><i class="fa-solid fa-map-pin"></i> Novo Ponto</h2>
+                <h2 style="font-size: 1rem; color: #2e7d32; margin-bottom: 4px;"><i class="fa-solid fa-map-pin" aria-hidden="true"></i> Novo Ponto</h2>
                 <p id="texto-dica-mapa" style="font-size: 0.75rem; color: #555; line-height: 1.4;">Selecione a localização no mapa.</p>
             </div>
 
@@ -116,8 +116,8 @@
         <!-- PASSO 2: Preenchimento de Detalhes (Oculto inicialmente) -->
         <form id="form-novo-ponto" style="display: none; flex-direction: column; gap: 10px; margin-top: 5px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-size: 0.8125rem; font-weight: 600; color: #2e7d32;"><i class="fa-solid fa-pen-to-square"></i> Detalhes do Local</span>
-                <button type="button" id="btn-voltar-passo-1" style="background: none; border: none; color: #0288d1; font-size: 0.75rem; cursor: pointer;"><i class="fa-solid fa-arrow-left"></i> Alterar Local</button>
+                <span style="font-size: 0.8125rem; font-weight: 600; color: #2e7d32;"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Detalhes do Local</span>
+                <button type="button" id="btn-voltar-passo-1" style="background: none; border: none; color: #0288d1; font-size: 0.75rem; cursor: pointer;"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Alterar Local</button>
             </div>
 
             <div class="form-grupo">
@@ -158,56 +158,62 @@
 
 <!-- Botão Tema Dia/Noite (Canto Superior Direito) -->
 <div style="position: absolute; top: 15px; right: 10px; z-index: 1000;">
-    <button onclick="alternarTema()" id="btn-tema" title="Alternar Modo Claro/Escuro" style="background-color: #2e7d32; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
-        <i class="fa-solid fa-moon" id="icone-tema"></i>
+    <button onclick="alternarTema()" id="btn-tema" title="Alternar Modo Claro/Escuro" aria-label="Modo noturno" aria-pressed="false" style="background-color: #2e7d32; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+        <i class="fa-solid fa-moon" aria-hidden="true" id="icone-tema"></i>
     </button>
 </div>
 
 <!-- Seletor de Tamanho de Fonte Compacto e Esguio (Canto Superior Direito) -->
-<div class="seletor-fonte">
-    <button class="btn-fonte" onclick="mudarTamanhoFonte('normal')" title="Fonte Normal" style="font-size: 0.6875rem;">A</button>
-    <button class="btn-fonte" onclick="mudarTamanhoFonte('grande')" title="Fonte Grande" style="font-size: 0.8125rem;">A+</button>
-    <button class="btn-fonte" onclick="mudarTamanhoFonte('muito-grande')" title="Fonte Muito Grande" style="font-size: 0.9375rem;">A++</button>
+<div class="seletor-fonte" role="group" aria-label="Tamanho da fonte">
+    <button class="btn-fonte" onclick="mudarTamanhoFonte('normal')" title="Fonte Normal" aria-label="A, fonte normal" aria-pressed="true" data-tamanho="normal" style="font-size: 0.6875rem;">A</button>
+    <button class="btn-fonte" onclick="mudarTamanhoFonte('grande')" title="Fonte Grande" aria-label="A+, fonte grande" aria-pressed="false" data-tamanho="grande" style="font-size: 0.8125rem;">A+</button>
+    <button class="btn-fonte" onclick="mudarTamanhoFonte('muito-grande')" title="Fonte Muito Grande" aria-label="A++, fonte muito grande" aria-pressed="false" data-tamanho="muito-grande" style="font-size: 0.9375rem;">A++</button>
 </div>
-<!-- Container do Mapa -->
-<div id="map"></div>
-
-<!-- Resultado da busca de endereço (anunciado por leitores de tela) -->
-<div id="aviso-busca" class="aviso-busca" role="status" aria-live="polite">
-    <i class="fa-solid fa-location-dot aviso-busca-icone" aria-hidden="true"></i>
-    <span id="aviso-busca-texto"></span>
-    <button type="button" id="btn-fechar-aviso-busca" class="aviso-busca-fechar" aria-label="Fechar aviso da busca">&times;</button>
-</div>
-
+<!-- Legenda e botão de estatísticas vêm antes do mapa para o Tab alcançá-los antes dos pins -->
 <!-- Legenda Fixa na Base -->
 
-<div class="map-legend-bar" id="legenda-mapa">
+<div class="map-legend-bar" id="legenda-mapa" role="region" aria-label="Legenda do mapa">
     <!-- Em telas muito estreitas (zoom de 200%) a legenda vira um botão que abre e fecha -->
     <button type="button" id="btn-legenda" class="btn-legenda" aria-expanded="false" aria-controls="itens-legenda">
         <i class="fa-solid fa-circle-info" aria-hidden="true"></i> Legenda
     </button>
     <div id="itens-legenda" class="itens-legenda">
     <div class="legend-item">
-        <div class="legend-pin-mini" style="background-color: #2e7d32;"><i class="fa-solid fa-bicycle"></i></div>
+        <div class="legend-pin-mini" style="background-color: #2e7d32;"><i class="fa-solid fa-bicycle" aria-hidden="true"></i></div>
         <span>Bicicletário</span>
     </div>
     <div class="legend-item">
-        <div class="legend-pin-mini" style="background-color: #0288d1;"><i class="fa-solid fa-square-parking"></i></div>
+        <div class="legend-pin-mini" style="background-color: #0288d1;"><i class="fa-solid fa-square-parking" aria-hidden="true"></i></div>
         <span>Paraciclo</span>
     </div>
     <div class="legend-item">
-        <div class="legend-pin-mini" style="background-color: #e65100;"><i class="fa-solid fa-wrench"></i></div>
+        <div class="legend-pin-mini" style="background-color: #e65100;"><i class="fa-solid fa-wrench" aria-hidden="true"></i></div>
         <span>Oficina / Suporte</span>
     </div>
     <div class="legend-item">
-        <div class="legend-pin-mini legenda-alerta-amarelo"><i class="fa-solid fa-exclamation"></i></div>
+        <div class="legend-pin-mini legenda-alerta-amarelo"><i class="fa-solid fa-exclamation" aria-hidden="true"></i></div>
         <span>Atenção: dano ou furto</span>
     </div>
     <div class="legend-item">
-        <div class="legend-pin-mini legenda-alerta-vermelho"><i class="fa-solid fa-ban"></i></div>
+        <div class="legend-pin-mini legenda-alerta-vermelho"><i class="fa-solid fa-ban" aria-hidden="true"></i></div>
         <span>Crítico: fechado ou lotado</span>
     </div>
     </div>
+</div>
+
+<!-- Botão Flutuante no Canto Inferior Direito -->
+<button id="btn-estatisticas" onclick="abrirModalEstatisticas()" title="Visualizar Estatísticas e Gráficos" aria-label="Abrir painel estatístico">
+    <i class="fa-solid fa-chart-pie" aria-hidden="true"></i>
+</button>
+
+<!-- Container do Mapa -->
+<div id="map" role="region" aria-label="Mapa dos pontos de apoio"></div>
+
+<!-- Resultado da busca de endereço (anunciado por leitores de tela) -->
+<div id="aviso-busca" class="aviso-busca" role="status" aria-live="polite">
+    <i class="fa-solid fa-location-dot aviso-busca-icone" aria-hidden="true"></i>
+    <span id="aviso-busca-texto"></span>
+    <button type="button" id="btn-fechar-aviso-busca" class="aviso-busca-fechar" aria-label="Fechar aviso da busca">&times;</button>
 </div>
 
 <!-- Leaflet JS -->
@@ -219,9 +225,9 @@
 
 <!-- Modal para Editar Ponto de Apoio -->
 <div id="modal-editar-ponto" class="modal" style="display: none;">
-    <div class="modal-conteudo">
-        <span class="fechar-modal" onclick="fecharModalEdicao()">&times;</span>
-        <h2 style="color: #2e7d32; margin-bottom: 15px;"><i class="fa-solid fa-pen-to-square"></i> Editar Ponto de Apoio</h2>
+    <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-edicao">
+        <button type="button" class="fechar-modal" onclick="fecharModalEdicao()" aria-label="Fechar">&times;</button>
+        <h2 id="titulo-modal-edicao" style="color: #2e7d32; margin-bottom: 15px;"><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar Ponto de Apoio</h2>
 
         <form id="form-editar-ponto" style="display: flex; flex-direction: column; gap: 12px;">
             <input type="hidden" id="edit-ponto-id">
@@ -238,8 +244,8 @@
 
             <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
 
-            <label style="font-weight: 600; font-size: 0.8125rem; color: #333;"><i class="fa-solid fa-shield"></i> Segurança:</label>
-            <div class="checkbox-group" style="display: flex; flex-direction: column; gap: 6px;">
+            <p id="rotulo-seguranca-edicao" style="font-weight: 600; font-size: 0.8125rem; color: #333;"><i class="fa-solid fa-shield" aria-hidden="true"></i> Segurança:</p>
+            <div class="checkbox-group" role="group" aria-labelledby="rotulo-seguranca-edicao" style="display: flex; flex-direction: column; gap: 6px;">
                 <label style="font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" id="edit-vigilancia"> Vigilância Humana</label>
                 <label style="font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" id="edit-cameras"> Câmera de Monitoramento</label>
             </div>
@@ -260,9 +266,9 @@
 
 <!-- Modal para Registrar Ocorrência -->
 <div id="modal-ocorrencia" class="modal" style="display: none;">
-    <div class="modal-conteudo">
-        <span class="fechar-modal" onclick="fecharModalOcorrencia()">&times;</span>
-        <h2>Registrar Ocorrência</h2>
+    <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-ocorrencia">
+        <button type="button" class="fechar-modal" onclick="fecharModalOcorrencia()" aria-label="Fechar">&times;</button>
+        <h2 id="titulo-modal-ocorrencia">Registrar Ocorrência</h2>
         <p class="aviso-seguranca-uso" role="note">
             <i class="fa-solid fa-hand" aria-hidden="true"></i>
             <span>Consulte e registre ocorrências com a bicicleta parada. Durante o trajeto, siga a navegação por voz do Google Maps.</span>
@@ -284,7 +290,7 @@
             <div class="form-grupo">
                 <label for="ocorrencia-descricao">Descrição:</label>
                 <textarea id="ocorrencia-descricao" rows="4" maxlength="1000" required placeholder="Descreva o problema ou situação..."></textarea>
-                <div id="contador-caracteres" style="font-size: 0.6875rem; color: #666; text-align: right; margin-top: 2px;">0/1000</div>
+                <div id="contador-caracteres" aria-live="polite" style="font-size: 0.6875rem; color: #666; text-align: right; margin-top: 2px;">0/1000</div>
             </div>
 
             <button type="submit" class="btn-salvar">Salvar Ocorrência</button>
@@ -294,41 +300,36 @@
 
 <!-- Modal para Exibir Detalhes da Ocorrência -->
 <div id="modal-detalhe-ocorrencia" class="modal" style="display: none;">
-    <div class="modal-conteudo">
-        <span class="fechar-modal" onclick="fecharModalDetalhe()">&times;</span>
+    <div class="modal-conteudo" role="dialog" aria-modal="true" aria-labelledby="detalhe-tipo">
+        <button type="button" class="fechar-modal" onclick="fecharModalDetalhe()" aria-label="Fechar">&times;</button>
         <h2 id="detalhe-tipo" style="color: #d32f2f; margin-bottom: 4px;">Tipo de Ocorrência</h2>
-        <p style="font-size: 0.75rem; color: #666; margin-bottom: 12px;"><i class="fa-regular fa-clock"></i> <span id="detalhe-data"></span></p>
+        <p style="font-size: 0.75rem; color: #666; margin-bottom: 12px;"><i class="fa-regular fa-clock" aria-hidden="true"></i> <span id="detalhe-data"></span></p>
         <div class="form-grupo">
-            <label>Descrição:</label>
+            <p style="font-weight: 600; font-size: 0.8125rem;">Descrição:</p>
             <p id="detalhe-descricao" style="background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #ddd; max-height: 150px; overflow-y: auto; font-size: 0.875rem; color: #333; word-break: break-word;"></p>
         </div>
     </div>
 </div>
-<!-- Botão Flutuante no Canto Inferior Direito -->
-<button id="btn-estatisticas" onclick="abrirModalEstatisticas()" title="Visualizar Estatísticas e Gráficos">
-    <i class="fa-solid fa-chart-pie"></i>
-</button>
-
 <!-- Modal de Estatísticas e Análise de Dados -->
 <div id="modal-estatisticas" class="modal" style="display: none;">
-    <div class="modal-conteudo modal-estatisticas-conteudo">
-        <span class="fechar-modal" onclick="fecharModalEstatisticas()">&times;</span>
-        <h2><i class="fa-solid fa-chart-line"></i> Painel Estatístico & Análise da Rede</h2>
+    <div class="modal-conteudo modal-estatisticas-conteudo" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-estatisticas">
+        <button type="button" class="fechar-modal" onclick="fecharModalEstatisticas()" aria-label="Fechar">&times;</button>
+        <h2 id="titulo-modal-estatisticas"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Painel Estatístico & Análise da Rede</h2>
 
         <!-- Barra Superior com os Botões de Cada Gráfico -->
-        <div class="botoes-graficos-container">
-            <button class="btn-aba-grafico active" onclick="carregarGrafico('infraestrutura', this)">Infraestrutura</button>
-            <button class="btn-aba-grafico" onclick="carregarGrafico('gratuidade', this)">Gratuidade x Cobertura</button>
-            <button class="btn-aba-grafico" onclick="carregarGrafico('seguranca', this)">Segurança</button>
-            <button class="btn-aba-grafico" onclick="carregarGrafico('situacao', this)">Situação dos Pontos</button>
-            <button class="btn-aba-grafico" onclick="carregarGrafico('ocorrencias_tipo', this)">Tipos de Ocorrência</button>
-            <button class="btn-aba-grafico" onclick="carregarGrafico('ocorrencias_tempo', this)">Evolução Temporal</button>
-            <button class="btn-aba-grafico" onclick="carregarGrafico('vagas', this)">Capacidade de Vagas</button>
+        <div class="botoes-graficos-container" role="group" aria-label="Escolha o gráfico">
+            <button class="btn-aba-grafico active" aria-pressed="true" onclick="carregarGrafico('infraestrutura', this)">Infraestrutura</button>
+            <button class="btn-aba-grafico" aria-pressed="false" onclick="carregarGrafico('gratuidade', this)">Gratuidade x Cobertura</button>
+            <button class="btn-aba-grafico" aria-pressed="false" onclick="carregarGrafico('seguranca', this)">Segurança</button>
+            <button class="btn-aba-grafico" aria-pressed="false" onclick="carregarGrafico('situacao', this)">Situação dos Pontos</button>
+            <button class="btn-aba-grafico" aria-pressed="false" onclick="carregarGrafico('ocorrencias_tipo', this)">Tipos de Ocorrência</button>
+            <button class="btn-aba-grafico" aria-pressed="false" onclick="carregarGrafico('ocorrencias_tempo', this)">Evolução Temporal</button>
+            <button class="btn-aba-grafico" aria-pressed="false" onclick="carregarGrafico('vagas', this)">Capacidade de Vagas</button>
         </div>
 
         <!-- Área de Exibição do Gráfico -->
         <div class="area-grafico-container">
-            <canvas id="meuGraficoChart"></canvas>
+            <canvas id="meuGraficoChart" role="img" aria-label="Gráfico"></canvas>
             <p id="grafico-sem-dados" class="grafico-sem-dados" role="status" hidden></p>
         </div>
     </div>

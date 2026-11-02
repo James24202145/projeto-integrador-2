@@ -1173,3 +1173,48 @@ body.dark-mode .aviso-busca.erro {
         gap: 4px;
     }
 }
+
+/* ==========================================
+   LEITORES DE TELA E TECLADO (F1.2)
+   ========================================== */
+/* Foco visível ao navegar pelo teclado (sobrepõe os "outline: none" dos campos) */
+:focus-visible {
+    outline: 3px solid #1565c0 !important;
+    outline-offset: 2px;
+}
+
+body.dark-mode :focus-visible {
+    outline-color: #90caf9 !important;
+}
+
+/* O título da ficha recebe o foco só para ser anunciado; não precisa de contorno */
+.popup-titulo:focus {
+    outline: none !important;
+}
+
+/* "Fechar" das janelas e itens de ocorrência viraram botões: mantêm a aparência anterior */
+.fechar-modal {
+    background: none;
+    border: none;
+    padding: 0;
+    line-height: 1;
+}
+
+body.dark-mode .fechar-modal {
+    color: #e0e0e0;
+}
+
+button.item-ocorrencia-popup {
+    width: 100%;
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    font-family: inherit;
+    color: inherit;
+    text-align: left;
+}
+
+/* "Filtros" passou a ser um título (h2) para a navegação por títulos */
+h2.filter-title {
+    margin: 0;
+}

@@ -55,17 +55,75 @@ const ROTULOS_OCORRENCIA = {
 // 2. UTILITÁRIOS
 // ==========================================
 
+// Evita que aspas no nome do ponto quebrem atributos como aria-label
+function escaparAtributo(texto) {
+    return String(texto ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
 // Os campos booleanos chegam do MySQL como 0/1
 function ehVerdadeiro(valor) {
     return valor === 1 || valor === true;
 }
 
-function exibirModal(id) {
-    document.getElementById(id).style.display = 'flex';
+// Janelas abertas, da mais antiga para a mais recente, com o elemento que tinha o foco antes
+const modaisAbertos = [];
+const SELETOR_FOCAVEIS = 'button:not([disabled]), [href], input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function elementosFocaveis(container) {
+    return [...container.querySelectorAll(SELETOR_FOCAVEIS)].filter(el => el.offsetParent !== null);
 }
 
+// Abre a janela e leva o foco para dentro dela (primeiro controle depois do botão Fechar)
+function exibirModal(id) {
+    const modal = document.getElementById(id);
+    if (!modaisAbertos.some(m => m.id === id)) {
+        modaisAbertos.push({ id, focoAnterior: document.activeElement });
+    }
+    modal.style.display = 'flex';
+
+    const focaveis = elementosFocaveis(modal);
+    const alvo = focaveis.find(el => !el.classList.contains('fechar-modal')) || focaveis[0];
+    if (alvo) alvo.focus();
+}
+
+// Fecha a janela e devolve o foco a quem a abriu
 function ocultarModal(id) {
     document.getElementById(id).style.display = 'none';
+
+    const indice = modaisAbertos.findIndex(m => m.id === id);
+    if (indice === -1) return;
+    const { focoAnterior } = modaisAbertos.splice(indice, 1)[0];
+    if (focoAnterior && focoAnterior.isConnected) focoAnterior.focus();
+}
+
+// Esc fecha a janela do topo; Tab circula só entre os controles dela
+function inicializarTecladoModais() {
+    document.addEventListener('keydown', evento => {
+        const topo = modaisAbertos[modaisAbertos.length - 1];
+        if (!topo) return;
+        const modal = document.getElementById(topo.id);
+
+        if (evento.key === 'Escape') {
+            evento.preventDefault();
+            modal.querySelector('.fechar-modal').click();
+            return;
+        }
+
+        if (evento.key === 'Tab') {
+            const focaveis = elementosFocaveis(modal);
+            if (focaveis.length === 0) return;
+            const primeiro = focaveis[0];
+            const ultimo = focaveis[focaveis.length - 1];
+
+            if (evento.shiftKey && (document.activeElement === primeiro || !modal.contains(document.activeElement))) {
+                evento.preventDefault();
+                ultimo.focus();
+            } else if (!evento.shiftKey && (document.activeElement === ultimo || !modal.contains(document.activeElement))) {
+                evento.preventDefault();
+                primeiro.focus();
+            }
+        }
+    });
 }
 
 // Busca os pontos na API e atualiza a lista global
@@ -94,6 +152,11 @@ function mudarTamanhoFonte(tamanho) {
     if (CLASSE_POR_TAMANHO_FONTE[tamanho]) {
         raiz.classList.add(CLASSE_POR_TAMANHO_FONTE[tamanho]);
     }
+
+    // Indica ao leitor de tela qual tamanho está selecionado
+    document.querySelectorAll('.btn-fonte').forEach(btn => {
+        btn.setAttribute('aria-pressed', btn.dataset.tamanho === tamanho);
+    });
 
     // O armazenamento pode estar bloqueado (navegação privada); a fonte muda mesmo assim
     try {
@@ -128,6 +191,7 @@ function alternarTema() {
     const isDark = document.body.classList.contains('dark-mode');
 
     if (iconeTema) iconeTema.className = isDark ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+    document.getElementById('btn-tema').setAttribute('aria-pressed', isDark);
 }
 
 // Alterna entre as abas do painel lateral
@@ -137,13 +201,19 @@ function mudarAba(aba) {
     const botoes = document.querySelectorAll('.tab-btn');
     const explorar = aba === 'explorar';
 
-    botoes.forEach(btn => btn.classList.remove('active'));
+    botoes.forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+    });
 
     if (abaExplorar) abaExplorar.style.display = explorar ? 'flex' : 'none';
     if (abaAdicionar) abaAdicionar.style.display = explorar ? 'none' : 'flex';
 
     const botaoAtivo = botoes[explorar ? 0 : 1];
-    if (botaoAtivo) botaoAtivo.classList.add('active');
+    if (botaoAtivo) {
+        botaoAtivo.classList.add('active');
+        botaoAtivo.setAttribute('aria-selected', 'true');
+    }
 }
 
 // Mostra/oculta o painel lateral em celulares
@@ -157,8 +227,17 @@ function inicializarMenuMobile() {
     }
 
     if (toggleBtn && closeBtn && sidebar) {
-        toggleBtn.addEventListener('click', () => sidebar.classList.remove('mobile-hidden'));
-        closeBtn.addEventListener('click', () => sidebar.classList.add('mobile-hidden'));
+        // Ao abrir, o foco vai para o botão Fechar do menu; ao fechar, volta ao botão Menu
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-hidden');
+            toggleBtn.setAttribute('aria-expanded', 'true');
+            closeBtn.focus();
+        });
+        closeBtn.addEventListener('click', () => {
+            sidebar.classList.add('mobile-hidden');
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.focus();
+        });
     }
 }
 
@@ -219,7 +298,7 @@ function fecharModalDetalhe() {
 function abrirModalEstatisticas() {
     const modal = document.getElementById('modal-estatisticas');
     if (modal) {
-        modal.style.display = 'flex';
+        exibirModal('modal-estatisticas');
         const primeiroBotao = document.querySelector('.btn-aba-grafico');
         carregarGrafico('infraestrutura', primeiroBotao);
     } else {
@@ -242,6 +321,10 @@ function desenharGrafico(tipoGrafico, labels, dataset, titulo, opcoesExtras = {}
     if (meuGrafico) {
         meuGrafico.destroy();
     }
+
+    // O gráfico é uma imagem para o leitor de tela: o título e os valores viram a descrição
+    const valores = labels.map((rotulo, i) => `${rotulo}: ${dataset.data[i]}`).join('; ');
+    document.getElementById('meuGraficoChart').setAttribute('aria-label', `${titulo}. ${valores}`);
 
     meuGrafico = new Chart(ctx, {
         type: tipoGrafico,
@@ -401,8 +484,12 @@ const GRAFICOS = {
 
 function carregarGrafico(tipo, elementoBotao) {
     if (elementoBotao) {
-        document.querySelectorAll('.btn-aba-grafico').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.btn-aba-grafico').forEach(btn => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
+        });
         elementoBotao.classList.add('active');
+        elementoBotao.setAttribute('aria-pressed', 'true');
     }
 
     if (meuGrafico) {
@@ -447,7 +534,14 @@ function carregarClima() {
 // ==========================================
 
 function inicializarMapa() {
-    map = L.map('map').setView(CENTRO_SP, 12);
+    map = L.map('map', { zoomControl: false }).setView(CENTRO_SP, 12);
+    L.control.zoom({ zoomInTitle: 'Aproximar o mapa', zoomOutTitle: 'Afastar o mapa' }).addTo(map);
+
+    // O Leaflet coloca os controles depois dos pins; trazê-los para o início faz o Tab
+    // chegar ao zoom antes de percorrer os pontos (a posição na tela não muda)
+    const containerMapa = map.getContainer();
+    const controles = containerMapa.querySelector('.leaflet-control-container');
+    if (controles) containerMapa.insertBefore(controles, containerMapa.firstChild);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
@@ -457,7 +551,16 @@ function inicializarMapa() {
     camadaMarcadores = L.layerGroup().addTo(map);
 
     // No celular a legenda sai da frente enquanto a ficha de um ponto está aberta
-    map.on('popupopen', () => document.body.classList.add('ficha-aberta'));
+    map.on('popupopen', evento => {
+        document.body.classList.add('ficha-aberta');
+
+        // Botão Fechar em português e foco no título da ficha, para o leitor de tela anunciá-la
+        const elementoFicha = evento.popup.getElement();
+        const fechar = elementoFicha.querySelector('.leaflet-popup-close-button');
+        if (fechar) fechar.setAttribute('aria-label', 'Fechar ficha do ponto');
+        const titulo = elementoFicha.querySelector('.popup-titulo');
+        if (titulo) titulo.focus();
+    });
     map.on('popupclose', () => document.body.classList.remove('ficha-aberta'));
 }
 
@@ -474,12 +577,12 @@ function obterIconePersonalizado(tipo, ultimaOcorrencia) {
     const alerta = obterAlerta(ultimaOcorrencia);
     const classeCor = alerta ? alerta.classeCor : estilo.classeCor;
     const selo = alerta
-        ? `<span class="pin-selo ${alerta.classeSelo}"><i class="fa-solid ${alerta.iconeSelo}"></i></span>`
+        ? `<span class="pin-selo ${alerta.classeSelo}"><i class="fa-solid ${alerta.iconeSelo}" aria-hidden="true"></i></span>`
         : '';
 
     return L.divIcon({
         className: 'custom-pin-wrapper',
-        html: `<div class="custom-pin ${classeCor}"><i class="fa-solid ${estilo.iconeFa}"></i></div>${selo}`,
+        html: `<div class="custom-pin ${classeCor}"><i class="fa-solid ${estilo.iconeFa}" aria-hidden="true"></i></div>${selo}`,
         iconSize: [34, 34],
         iconAnchor: [17, 34],
         popupAnchor: [0, -34]
@@ -498,6 +601,7 @@ function montarAlertaPopupHtml(ultimaOcorrencia) {
 }
 
 function montarPopupHtml(ponto, idPonto) {
+    const nomeAtributo = escaparAtributo(ponto.nome);
     return `
         <div class="popup-content">
             <span class="popup-tag">${ponto.tipo}</span>
@@ -505,29 +609,29 @@ function montarPopupHtml(ponto, idPonto) {
 
             <!-- Cabeçalho com Título e Botão de Rota do Google Maps -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px;">
-                <h3 style="margin: 0; flex: 1;">${ponto.nome}</h3>
-                <a href="https://www.google.com/maps/dir/?api=1&destination=${ponto.latitude},${ponto.longitude}&travelmode=bicycling"
+                <h3 class="popup-titulo" tabindex="-1" style="margin: 0; flex: 1;">${ponto.nome}</h3>
+                <a aria-label="Traçar rota de bicicleta até ${nomeAtributo} no Google Maps (abre em nova aba)" href="https://www.google.com/maps/dir/?api=1&destination=${ponto.latitude},${ponto.longitude}&travelmode=bicycling"
                    target="_blank"
                    title="Traçar rota de bicicleta no Google Maps"
                    style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.125rem; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <i class="fa-solid fa-person-biking"></i>
+                    <i class="fa-solid fa-person-biking" aria-hidden="true"></i>
                 </a>
             </div>
             <!-- Ações: Editar e Excluir lado a lado -->
             <div style="display: flex; gap: 12px; margin-bottom: 4px;">
-                <button class="popup-acao" onclick="abrirModalEdicao(${idPonto})" style="background: none; border: none; color: #0288d1; font-size: 0.6875rem; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
-                    <i class="fa-solid fa-pen-to-square"></i> Editar Ponto
+                <button class="popup-acao" aria-label="Editar ponto ${nomeAtributo}" onclick="abrirModalEdicao(${idPonto})" style="background: none; border: none; color: #0288d1; font-size: 0.6875rem; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
+                    <i class="fa-solid fa-pen-to-square" aria-hidden="true"></i> Editar Ponto
                 </button>
-                <button class="popup-acao" onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 0.6875rem; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
-                    <i class="fa-solid fa-trash-can"></i> Excluir Ponto
+                <button class="popup-acao" aria-label="Excluir ponto ${nomeAtributo}" onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 0.6875rem; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
+                    <i class="fa-solid fa-trash-can" aria-hidden="true"></i> Excluir Ponto
                 </button>
             </div>
 
-            <p><i class="fa-solid fa-location-dot"></i> ${ponto.endereco}</p>
-            <p><i class="fa-solid fa-shield"></i> <strong>Segurança:</strong> ${ponto.seguranca_geral ? 'Sim' : 'Não'}</p>
-            <p><i class="fa-solid fa-layer-group"></i> <strong>Vagas:</strong> ${ponto.capacidade_vagas || 'N/I'}</p>
-            <p><i class="fa-solid fa-shield-halved"></i> <strong>Coberto:</strong> ${ponto.coberto ? 'Sim' : 'Não'}</p>
-            <p><i class="fa-solid fa-tag"></i> <strong>Gratuito:</strong> ${ponto.gratuito ? 'Sim' : 'Não'}</p>
+            <p><i class="fa-solid fa-location-dot" aria-hidden="true"></i> ${ponto.endereco}</p>
+            <p><i class="fa-solid fa-shield" aria-hidden="true"></i> <strong>Segurança:</strong> ${ponto.seguranca_geral ? 'Sim' : 'Não'}</p>
+            <p><i class="fa-solid fa-layer-group" aria-hidden="true"></i> <strong>Vagas:</strong> ${ponto.capacidade_vagas || 'N/I'}</p>
+            <p><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> <strong>Coberto:</strong> ${ponto.coberto ? 'Sim' : 'Não'}</p>
+            <p><i class="fa-solid fa-tag" aria-hidden="true"></i> <strong>Gratuito:</strong> ${ponto.gratuito ? 'Sim' : 'Não'}</p>
 
             <div class="popup-ocorrencias-container">
                 <h4>Últimas Ocorrências</h4>
@@ -542,7 +646,7 @@ function montarPopupHtml(ponto, idPonto) {
             </p>
 
             <button class="btn-ocorrencia" onclick="abrirModalOcorrencia(${idPonto})">
-                <i class="fa-solid fa-triangle-exclamation"></i> Registrar Ocorrência
+                <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Registrar Ocorrência
             </button>
         </div>
     `;
@@ -554,10 +658,10 @@ function montarItemOcorrenciaHtml(oc) {
     const descEscapada = (oc.descricao || '').replace(/'/g, "\\'").replace(/\n/g, ' ');
 
     return `
-        <div class="item-ocorrencia-popup" onclick="abrirModalDetalhe('${tipoEscapado}', '${dataEscapada}', '${descEscapada}')">
-            <span class="tipo"><i class="fa-solid fa-circle-exclamation"></i> ${oc.tipo}</span>
+        <button type="button" class="item-ocorrencia-popup" onclick="abrirModalDetalhe('${tipoEscapado}', '${dataEscapada}', '${descEscapada}')">
+            <span class="tipo"><i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i> ${oc.tipo}</span>
             <span class="data">${oc.data_relato}</span>
-        </div>
+        </button>
     `;
 }
 
@@ -722,7 +826,7 @@ function destacarEnderecoBuscado(latlng, endereco) {
         keyboard: false,
         icon: L.divIcon({
             className: 'custom-pin-wrapper',
-            html: '<div class="custom-pin pin-endereco-busca"><i class="fa-solid fa-location-dot"></i></div>',
+            html: '<div class="custom-pin pin-endereco-busca"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></div>',
             iconSize: [34, 34],
             iconAnchor: [17, 34]
         })
@@ -1068,6 +1172,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarFormOcorrencia();
     inicializarMenuMobile();
     inicializarLegenda();
+    inicializarTecladoModais();
 
     // Carrega os pontos iniciais do Backend Flask
     recarregarPontos()
