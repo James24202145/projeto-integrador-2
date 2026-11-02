@@ -34,6 +34,9 @@ const OCORRENCIAS_ALERTA_AMARELO = ['Vandalismo', 'Avaria/Estrutura Danificada',
 const COR_ALERTA_VERMELHO = '#d32f2f';
 const COR_ALERTA_AMARELO = '#fbc02d';
 
+// Exibido na ficha do ponto e no formulário de ocorrência (o mesmo texto está no index.html)
+const AVISO_SEGURANCA_USO = 'Consulte e registre ocorrências com a bicicleta parada. Durante o trajeto, siga a navegação por voz do Google Maps.';
+
 // Tipos de ocorrência do formulário, com o nome curto usado nos gráficos
 const ROTULOS_OCORRENCIA = {
     'Vandalismo': 'Vandalismo',
@@ -483,6 +486,11 @@ function montarPopupHtml(ponto, idPonto) {
                     <span class="sem-ocorrencias">Carregando...</span>
                 </div>
             </div>
+
+            <p class="aviso-seguranca-uso" role="note">
+                <i class="fa-solid fa-hand" aria-hidden="true"></i>
+                <span>${AVISO_SEGURANCA_USO}</span>
+            </p>
 
             <button class="btn-ocorrencia" onclick="abrirModalOcorrencia(${idPonto})">
                 <i class="fa-solid fa-triangle-exclamation"></i> Registrar Ocorrência

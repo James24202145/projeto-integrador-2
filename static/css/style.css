@@ -97,6 +97,31 @@
     }
 }
 
+/* Aviso de segurança de uso (ficha do ponto e formulário de ocorrência) */
+.aviso-seguranca-uso {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 10px 0;
+    padding: 8px 10px;
+    background-color: #e3f2fd;
+    border-left: 4px solid #1565c0;
+    border-radius: 4px;
+    color: #0d47a1;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.aviso-seguranca-uso i {
+    margin-top: 2px;
+}
+
+body.dark-mode .aviso-seguranca-uso {
+    background-color: #0d2a45;
+    border-left-color: #64b5f6;
+    color: #bbdefb !important;
+}
+
 /* Aviso exibido sobre o gráfico quando não há dados */
 .grafico-sem-dados {
     position: absolute;
