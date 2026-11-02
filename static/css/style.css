@@ -296,6 +296,13 @@ body.dark-mode p {
     color: #e0e0e0 !important;
 }
 
+/* Ícone do clima: as nuvens do OpenWeather são brancas e sumiam no fundo verde-claro.
+   O fundo azul só atrás do ícone mantém o contraste dos textos do quadro. */
+#weather-icon {
+    background-color: #7a9cbf;
+    border-radius: 50%;
+}
+
 /* 7. Widget de Clima no modo escuro */
 body.dark-mode #weather-widget {
     background-color: #1a2e1b !important;
