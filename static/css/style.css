@@ -1069,3 +1069,62 @@ body.dark-mode .aviso-busca.erro {
         bottom: 100px;
     }
 }
+
+/* ==========================================
+   MENU LATERAL DENTRO DA ÁREA VISÍVEL
+   ========================================== */
+/* No computador o menu termina acima da legenda e rola se não couber (max-height não inclui o padding) */
+.sidebar {
+    max-height: calc(100vh - 130px); /* 20px do topo + 40px de padding + 70px da legenda */
+    overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+    /* No celular o menu ocupa a largura da tela, com espaçamentos menores */
+    .sidebar {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        width: auto;
+        max-height: calc(100dvh - 40px); /* 10px de margem em cima e embaixo + 20px de padding */
+        padding: 8px 14px 12px;
+        gap: 8px;
+    }
+
+    .tab-conteudo {
+        gap: 10px;
+    }
+
+    #weather-widget {
+        margin-bottom: 0 !important;
+        padding: 6px 12px !important;
+    }
+
+    .brand-icon {
+        font-size: 22px;
+    }
+
+    .brand h1 {
+        font-size: 18px;
+    }
+
+    .filter-section {
+        gap: 6px;
+    }
+
+    .checkbox-group {
+        gap: 0;
+    }
+
+    .counter {
+        padding-top: 6px;
+    }
+
+    /* Com o menu aberto, os controles do mapa saem da frente (voltam ao fechar) */
+    body:has(.sidebar:not(.mobile-hidden)) #toggleMenuBtn,
+    .sidebar:not(.mobile-hidden) ~ .seletor-fonte,
+    .sidebar:not(.mobile-hidden) ~ .map-legend-bar,
+    .sidebar:not(.mobile-hidden) ~ #btn-estatisticas {
+        display: none !important;
+    }
+}
