@@ -83,17 +83,41 @@ function recarregarPontos() {
 // 3. ACESSIBILIDADE E INTERFACE
 // ==========================================
 
-// Ajusta o tamanho da fonte
+const CHAVE_TAMANHO_FONTE = 'cicloponto-tamanho-fonte';
+const CLASSE_POR_TAMANHO_FONTE = { 'grande': 'font-large', 'muito-grande': 'font-xlarge' };
+
+// Ajusta o tamanho da fonte na raiz (os textos usam rem) e guarda a escolha do usuário
 function mudarTamanhoFonte(tamanho) {
-    const body = document.body;
+    const raiz = document.documentElement;
 
-    body.classList.remove('font-large', 'font-xlarge');
-
-    if (tamanho === 'grande') {
-        body.classList.add('font-large');
-    } else if (tamanho === 'muito-grande') {
-        body.classList.add('font-xlarge');
+    raiz.classList.remove('font-large', 'font-xlarge');
+    if (CLASSE_POR_TAMANHO_FONTE[tamanho]) {
+        raiz.classList.add(CLASSE_POR_TAMANHO_FONTE[tamanho]);
     }
+
+    // O armazenamento pode estar bloqueado (navegação privada); a fonte muda mesmo assim
+    try {
+        localStorage.setItem(CHAVE_TAMANHO_FONTE, tamanho);
+    } catch (e) { }
+}
+
+// Reaplica o tamanho escolhido em uma visita anterior
+function restaurarTamanhoFonte() {
+    try {
+        const tamanho = localStorage.getItem(CHAVE_TAMANHO_FONTE);
+        if (tamanho) mudarTamanhoFonte(tamanho);
+    } catch (e) { }
+}
+
+// Abre e fecha a legenda quando ela vira botão (telas muito estreitas)
+function inicializarLegenda() {
+    const botao = document.getElementById('btn-legenda');
+    const legenda = document.getElementById('legenda-mapa');
+
+    botao.addEventListener('click', () => {
+        const aberta = legenda.classList.toggle('aberta');
+        botao.setAttribute('aria-expanded', aberta);
+    });
 }
 
 // Alterna entre Modo Claro e Modo Escuro
@@ -431,6 +455,10 @@ function inicializarMapa() {
     }).addTo(map);
 
     camadaMarcadores = L.layerGroup().addTo(map);
+
+    // No celular a legenda sai da frente enquanto a ficha de um ponto está aberta
+    map.on('popupopen', () => document.body.classList.add('ficha-aberta'));
+    map.on('popupclose', () => document.body.classList.remove('ficha-aberta'));
 }
 
 // Alerta do ponto de acordo com a última ocorrência (null quando não há alerta)
@@ -481,16 +509,16 @@ function montarPopupHtml(ponto, idPonto) {
                 <a href="https://www.google.com/maps/dir/?api=1&destination=${ponto.latitude},${ponto.longitude}&travelmode=bicycling"
                    target="_blank"
                    title="Traçar rota de bicicleta no Google Maps"
-                   style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 18px; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                   style="background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1.125rem; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     <i class="fa-solid fa-person-biking"></i>
                 </a>
             </div>
             <!-- Ações: Editar e Excluir lado a lado -->
             <div style="display: flex; gap: 12px; margin-bottom: 4px;">
-                <button class="popup-acao" onclick="abrirModalEdicao(${idPonto})" style="background: none; border: none; color: #0288d1; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
+                <button class="popup-acao" onclick="abrirModalEdicao(${idPonto})" style="background: none; border: none; color: #0288d1; font-size: 0.6875rem; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
                     <i class="fa-solid fa-pen-to-square"></i> Editar Ponto
                 </button>
-                <button class="popup-acao" onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 11px; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
+                <button class="popup-acao" onclick="excluirPonto(${idPonto})" style="background: none; border: none; color: #d32f2f; font-size: 0.6875rem; font-weight: 600; cursor: pointer; padding: 0; display: flex; align-items: center; gap: 4px;">
                     <i class="fa-solid fa-trash-can"></i> Excluir Ponto
                 </button>
             </div>
@@ -560,6 +588,15 @@ function carregarOcorrenciasPopup(idPonto) {
 function renderizarPontos(pontos) {
     camadaMarcadores.clearLayers();
 
+    // Com A+ e A++ a ficha cresce: limita a altura (com rolagem) e, no celular, a largura,
+    // para ela não ficar por baixo do menu (topo) nem da coluna de botões (direita)
+    const OPCOES_POPUP_PONTO = {
+        maxHeight: Math.max(window.innerHeight - 140, 250),
+        maxWidth: Math.min(300, window.innerWidth - 90),
+        autoPanPaddingTopLeft: [10, 70],
+        autoPanPaddingBottomRight: [64, 10]
+    };
+
     pontos.forEach(ponto => {
         const icone = obterIconePersonalizado(ponto.tipo, ponto.ultima_ocorrencia_tipo);
         const alerta = obterAlerta(ponto.ultima_ocorrencia_tipo);
@@ -567,7 +604,7 @@ function renderizarPontos(pontos) {
         const marker = L.marker([ponto.latitude, ponto.longitude], { icon: icone, title: titulo });
         const idPonto = ponto.id_ponto || ponto.id;
 
-        marker.bindPopup(montarPopupHtml(ponto, idPonto));
+        marker.bindPopup(montarPopupHtml(ponto, idPonto), OPCOES_POPUP_PONTO);
         marker.on('popupopen', () => carregarOcorrenciasPopup(idPonto));
 
         camadaMarcadores.addLayer(marker);
@@ -1017,6 +1054,8 @@ function inicializarFormOcorrencia() {
 // 11. INICIALIZAÇÃO
 // ==========================================
 
+// Aplicado antes de a página terminar de carregar, para não piscar no tamanho padrão
+restaurarTamanhoFonte();
 carregarClima();
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1028,6 +1067,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarFormEdicao();
     inicializarFormOcorrencia();
     inicializarMenuMobile();
+    inicializarLegenda();
 
     // Carrega os pontos iniciais do Backend Flask
     recarregarPontos()

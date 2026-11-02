@@ -10,7 +10,7 @@
     color: white;
     border: none;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    font-size: 18px;
+    font-size: 1.125rem;
     cursor: pointer;
     z-index: 1000;
     transition: transform 0.2s, background-color 0.2s;
@@ -35,7 +35,7 @@
 
 /* Título mais compacto e próximo do topo */
 .modal-estatisticas-conteudo h2 {
-    font-size: 15px !important;
+    font-size: 0.9375rem !important;
     margin-bottom: 8px !important;
     margin-top: 0 !important;
     padding-right: 20px;
@@ -56,13 +56,13 @@
     color: #3c4043;
     padding: 5px 8px !important;
     border-radius: 12px !important;
-    font-size: 11px !important;
+    font-size: 0.6875rem !important;
     font-weight: 600;
     cursor: pointer;
     text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    /* Com A+ e A++ o nome quebra em duas linhas em vez de ser cortado */
+    white-space: normal;
+    line-height: 1.2;
     transition: all 0.2s ease;
 }
 
@@ -110,7 +110,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 0.625rem;
     pointer-events: none;
 }
 
@@ -132,7 +132,7 @@
     padding: 6px 8px;
     border-radius: 4px;
     border-left: 4px solid;
-    font-size: 12px;
+    font-size: 0.75rem;
 }
 
 .popup-alerta.pin-selo-amarelo {
@@ -174,7 +174,7 @@ body.dark-mode .popup-alerta.pin-selo-vermelho {
     border-left: 4px solid #1565c0;
     border-radius: 4px;
     color: #0d47a1;
-    font-size: 12px;
+    font-size: 0.75rem;
     line-height: 1.4;
 }
 
@@ -196,7 +196,7 @@ body.dark-mode .aviso-seguranca-uso {
     background-color: rgba(255, 255, 255, 0.92);
     border-radius: 8px;
     color: #5f6368;
-    font-size: 14px;
+    font-size: 0.875rem;
     text-align: center;
 }
 
@@ -209,27 +209,14 @@ body.dark-mode .grafico-sem-dados {
     color: #e0e0e0;
 }
 
-/* Classes de Ajuste de Tamanho de Fonte */
-body.font-large {
-    font-size: 115% !important;
-}
-body.font-large .sidebar-panel,
-body.font-large .popup-content,
-body.font-large input,
-body.font-large select,
-body.font-large button {
-    font-size: 1.1rem !important;
+/* Classes de Ajuste de Tamanho de Fonte (A, A+, A++)
+   Os textos usam rem, então mudar a fonte da raiz amplia tudo, inclusive legenda e rótulos */
+html.font-large {
+    font-size: 115%;
 }
 
-body.font-xlarge {
-    font-size: 130% !important;
-}
-body.font-xlarge .sidebar-panel,
-body.font-xlarge .popup-content,
-body.font-xlarge input,
-body.font-xlarge select,
-body.font-xlarge button {
-    font-size: 1.25rem !important;
+html.font-xlarge {
+    font-size: 130%;
 }
 
 /* ==========================================
@@ -368,18 +355,18 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 }
 
 .brand-icon {
-    font-size: 28px;
+    font-size: 1.75rem;
     color: #2e7d32;
 }
 
 .brand h1 {
-    font-size: 20px;
+    font-size: 1.25rem;
     color: #2e7d32;
     font-weight: 700;
 }
 
 .brand p {
-    font-size: 12px;
+    font-size: 0.75rem;
     color: #666;
 }
 
@@ -393,7 +380,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     position: absolute;
     left: 12px;
     color: #888;
-    font-size: 14px;
+    font-size: 0.875rem;
 }
 
 .search-box input {
@@ -401,7 +388,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     padding: 10px 10px 10px 36px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 0.875rem;
     outline: none;
 }
 
@@ -413,12 +400,12 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 
 .filter-title {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 0.875rem;
     color: #333;
 }
 
 .form-group label {
-    font-size: 12px;
+    font-size: 0.75rem;
     color: #555;
     display: block;
     margin-bottom: 4px;
@@ -429,19 +416,19 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 0.875rem;
 }
 
 .checkbox-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: #444;
 }
 
 .counter {
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: #666;
     border-top: 1px solid #eee;
     padding-top: 10px;
@@ -474,7 +461,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 .custom-pin i {
     transform: rotate(45deg);
     color: #ffffff;
-    font-size: 15px;
+    font-size: 0.9375rem;
 }
 
 .pin-bicicletario { background-color: #2e7d32 !important; }
@@ -484,7 +471,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 
 /* Estilo do Popup */
 .popup-content {
-    font-size: 13px;
+    font-size: 0.8125rem;
     line-height: 1.5;
     max-width: 240px;
 }
@@ -492,7 +479,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 .popup-content h3 {
     color: #2e7d32;
     margin-bottom: 6px;
-    font-size: 15px;
+    font-size: 0.9375rem;
 }
 
 .popup-tag {
@@ -501,7 +488,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     background: #e8f5e9;
     color: #2e7d32;
     border-radius: 12px;
-    font-size: 11px;
+    font-size: 0.6875rem;
     font-weight: bold;
     margin-bottom: 8px;
 }
@@ -525,7 +512,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 13px;
+    font-size: 0.8125rem;
     color: #555;
 }
 
@@ -542,7 +529,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 
 .legend-pin-fix i {
     transform: none !important;
-    font-size: 12px !important;
+    font-size: 0.75rem !important;
 }
 
 /* Listagem de Ocorrências no Popup */
@@ -553,7 +540,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 }
 
 .popup-ocorrencias-container h4 {
-    font-size: 11px;
+    font-size: 0.6875rem;
     color: #666;
     margin-bottom: 6px;
     text-transform: uppercase;
@@ -572,7 +559,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     background: #fdf2f2;
     border-left: 3px solid #d32f2f;
     padding: 5px 6px;
-    font-size: 11px;
+    font-size: 0.6875rem;
     border-radius: 4px;
     cursor: pointer;
     transition: background 0.2s;
@@ -595,12 +582,12 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 }
 
 .item-ocorrencia-popup span.data {
-    font-size: 9px;
+    font-size: 0.5625rem;
     color: #777;
 }
 
 .sem-ocorrencias {
-    font-size: 11px;
+    font-size: 0.6875rem;
     color: #888;
     font-style: italic;
     margin: 2px 0;
@@ -615,7 +602,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     padding: 8px 12px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 600;
     margin-top: 10px;
     transition: background-color 0.2s;
@@ -653,7 +640,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 }
 
 .modal-conteudo h2 {
-    font-size: 18px;
+    font-size: 1.125rem;
     color: #333;
 }
 
@@ -661,7 +648,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     position: absolute;
     top: 12px;
     right: 16px;
-    font-size: 20px;
+    font-size: 1.25rem;
     cursor: pointer;
     color: #666;
 }
@@ -673,7 +660,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
 }
 
 .form-grupo label {
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: #444;
 }
@@ -684,7 +671,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 0.875rem;
     outline: none;
 }
 
@@ -696,7 +683,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     border-radius: 6px;
     cursor: pointer;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 0.875rem;
     transition: background-color 0.2s;
     margin-top: 12px;
 }
@@ -728,7 +715,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     background: transparent;
     border: none;
     padding: 8px;
-    font-size: 13px;
+    font-size: 0.8125rem;
     font-weight: 600;
     color: #555;
     border-radius: 6px;
@@ -768,7 +755,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     display: flex;
     gap: 15px;
     align-items: center;
-    font-size: 12px;
+    font-size: 0.75rem;
     font-weight: 500;
     color: #333;
 }
@@ -785,7 +772,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 10px;
+    font-size: 0.625rem;
 }
 @media (max-width: 768px) {
     .map-legend-bar {
@@ -829,7 +816,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     padding: 10px 16px;
     border-radius: 50px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 500;
     cursor: pointer;
     align-items: center;
@@ -853,7 +840,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     border-radius: 8px;
     background: #2e7d32;
     color: #ffffff;
-    font-size: 15px;
+    font-size: 0.9375rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -886,7 +873,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     border-left: 5px solid #2e7d32;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 600;
     line-height: 1.35;
 }
@@ -914,7 +901,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
     border: none;
     background: none;
     color: inherit;
-    font-size: 22px;
+    font-size: 1.375rem;
     cursor: pointer;
 }
 
@@ -988,7 +975,7 @@ body.dark-mode .aviso-busca.erro {
     width: var(--area-toque);
     height: var(--area-toque);
     line-height: var(--area-toque);
-    font-size: 22px;
+    font-size: 1.375rem;
 }
 
 /* Menu, abas e campos da barra lateral */
@@ -1034,14 +1021,14 @@ body.dark-mode .aviso-busca.erro {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
+    font-size: 1.625rem;
 }
 
 /* Fechar a ficha do ponto (popup do Leaflet) */
 .leaflet-container a.leaflet-popup-close-button {
     width: var(--area-toque);
     height: var(--area-toque);
-    font-size: 26px;
+    font-size: 1.625rem;
     line-height: var(--area-toque);
     top: 0;
     right: 0;
@@ -1070,10 +1057,12 @@ body.dark-mode .aviso-busca.erro {
     left: 74px;
 }
 
-/* No celular a legenda ocupa duas linhas: o botão de estatísticas fica acima dela */
+/* No celular a legenda cresce com a fonte (A+ e A++): o botão de estatísticas
+   fica na coluna da direita, abaixo do seletor de fonte, longe dela */
 @media (max-width: 768px) {
     #btn-estatisticas {
-        bottom: 100px;
+        top: 224px;
+        bottom: auto;
     }
 }
 
@@ -1108,11 +1097,11 @@ body.dark-mode .aviso-busca.erro {
     }
 
     .brand-icon {
-        font-size: 22px;
+        font-size: 1.375rem;
     }
 
     .brand h1 {
-        font-size: 18px;
+        font-size: 1.125rem;
     }
 
     .filter-section {
@@ -1131,7 +1120,56 @@ body.dark-mode .aviso-busca.erro {
     body:has(.sidebar:not(.mobile-hidden)) #toggleMenuBtn,
     .sidebar:not(.mobile-hidden) ~ .seletor-fonte,
     .sidebar:not(.mobile-hidden) ~ .map-legend-bar,
-    .sidebar:not(.mobile-hidden) ~ #btn-estatisticas {
+    .sidebar:not(.mobile-hidden) ~ #btn-estatisticas,
+    body.ficha-aberta .map-legend-bar {
         display: none !important;
+    }
+}
+
+/* Com zoom de 200% (ou A++) em telas estreitas, as abas do menu quebram de linha em vez de cortar */
+.sidebar-tabs {
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    flex: 1 1 auto;
+}
+
+/* Legenda recolhível: nas telas comuns os itens aparecem como sempre e o botão fica oculto */
+.itens-legenda {
+    display: contents;
+}
+
+.btn-legenda {
+    display: none;
+}
+
+@media (max-width: 300px) {
+    .btn-legenda {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        min-height: var(--area-toque);
+        background: none;
+        border: none;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: inherit;
+        cursor: pointer;
+    }
+
+    .map-legend-bar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .map-legend-bar:not(.aberta) .itens-legenda {
+        display: none;
+    }
+
+    .map-legend-bar.aberta .itens-legenda {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
     }
 }

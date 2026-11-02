@@ -25,7 +25,7 @@
 <div class="sidebar" id="sidebarPanel">
     <!-- Botão de Fechar no topo do painel para dispositivos móveis -->
     <div class="d-flex justify-content-end d-md-none" style="padding: 5px 5px 0 0;">
-        <button id="closeMenuBtn" class="btn-close btn-close-mobile" aria-label="Fechar" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #666;"><i class="fa-solid fa-xmark"></i></button>
+        <button id="closeMenuBtn" class="btn-close btn-close-mobile" aria-label="Fechar" style="background: none; border: none; font-size: 1.125rem; cursor: pointer; color: #666;"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
     <!-- Abas do Painel -->
@@ -40,9 +40,9 @@
         <!-- Widget de Clima -->
         <div id="weather-widget" style="display: flex; align-items: center; gap: 10px; background: #f1f8e9; padding: 10px 12px; border-radius: 8px; margin-bottom: 12px; border: 1px solid #c8e6c9;">
             <img id="weather-icon" src="" alt="Clima" style="width: 36px; height: 36px; display: none;">
-            <div style="font-size: 13px; color: #2e7d32;">
+            <div style="font-size: 0.8125rem; color: #2e7d32;">
                 <strong id="weather-temp">Carregando clima...</strong>
-                <div id="weather-desc" style="font-size: 11px; color: #555; text-transform: capitalize;">São Paulo</div>
+                <div id="weather-desc" style="font-size: 0.6875rem; color: #555; text-transform: capitalize;">São Paulo</div>
             </div>
         </div>
 
@@ -93,18 +93,18 @@
         <!-- PASSO 1: Seleção de Coordenadas no Mapa -->
         <div id="novo-passo-1">
             <div style="margin-bottom: 12px;">
-                <h2 style="font-size: 16px; color: #2e7d32; margin-bottom: 4px;"><i class="fa-solid fa-map-pin"></i> Novo Ponto</h2>
-                <p id="texto-dica-mapa" style="font-size: 12px; color: #555; line-height: 1.4;">Selecione a localização no mapa.</p>
+                <h2 style="font-size: 1rem; color: #2e7d32; margin-bottom: 4px;"><i class="fa-solid fa-map-pin"></i> Novo Ponto</h2>
+                <p id="texto-dica-mapa" style="font-size: 0.75rem; color: #555; line-height: 1.4;">Selecione a localização no mapa.</p>
             </div>
 
             <div style="display: flex; gap: 6px; margin-bottom: 12px; width: 100%;">
                 <div class="form-grupo" style="flex: 1; min-width: 0;">
-                    <label for="novo-lat" style="font-size: 11px;">Latitude:</label>
-                    <input type="text" id="novo-lat" readonly placeholder="Selecione..." style="width: 100%; box-sizing: border-box; padding: 6px 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 11px; background: #f5f5f5; outline: none;">
+                    <label for="novo-lat" style="font-size: 0.6875rem;">Latitude:</label>
+                    <input type="text" id="novo-lat" readonly placeholder="Selecione..." style="width: 100%; box-sizing: border-box; padding: 6px 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.6875rem; background: #f5f5f5; outline: none;">
                 </div>
                 <div class="form-grupo" style="flex: 1; min-width: 0;">
-                    <label for="novo-lng" style="font-size: 11px;">Longitude:</label>
-                    <input type="text" id="novo-lng" readonly placeholder="Selecione..." style="width: 100%; box-sizing: border-box; padding: 6px 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 11px; background: #f5f5f5; outline: none;">
+                    <label for="novo-lng" style="font-size: 0.6875rem;">Longitude:</label>
+                    <input type="text" id="novo-lng" readonly placeholder="Selecione..." style="width: 100%; box-sizing: border-box; padding: 6px 4px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.6875rem; background: #f5f5f5; outline: none;">
                 </div>
             </div>
 
@@ -116,18 +116,18 @@
         <!-- PASSO 2: Preenchimento de Detalhes (Oculto inicialmente) -->
         <form id="form-novo-ponto" style="display: none; flex-direction: column; gap: 10px; margin-top: 5px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <span style="font-size: 13px; font-weight: 600; color: #2e7d32;"><i class="fa-solid fa-pen-to-square"></i> Detalhes do Local</span>
-                <button type="button" id="btn-voltar-passo-1" style="background: none; border: none; color: #0288d1; font-size: 12px; cursor: pointer;"><i class="fa-solid fa-arrow-left"></i> Alterar Local</button>
+                <span style="font-size: 0.8125rem; font-weight: 600; color: #2e7d32;"><i class="fa-solid fa-pen-to-square"></i> Detalhes do Local</span>
+                <button type="button" id="btn-voltar-passo-1" style="background: none; border: none; color: #0288d1; font-size: 0.75rem; cursor: pointer;"><i class="fa-solid fa-arrow-left"></i> Alterar Local</button>
             </div>
 
             <div class="form-grupo">
                 <label for="novo-nome">Nome do Local:</label>
-                <input type="text" id="novo-nome" required placeholder="Ex: Bicicletário Estação X" style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box;">
+                <input type="text" id="novo-nome" required placeholder="Ex: Bicicletário Estação X" style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8125rem; outline: none; width: 100%; box-sizing: border-box;">
             </div>
 
             <div class="form-grupo">
                 <label for="novo-tipo">Tipo de Ponto:</label>
-                <select id="novo-tipo" style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box;">
+                <select id="novo-tipo" style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8125rem; outline: none; width: 100%; box-sizing: border-box;">
                     <option value="Bicicletário">Bicicletário</option>
                     <option value="Paraciclo">Paraciclo</option>
                     <option value="Oficina / Suporte">Oficina / Suporte</option>
@@ -136,12 +136,12 @@
 
             <div class="form-grupo">
                 <label for="novo-endereco">Endereço:</label>
-                <input type="text" id="novo-endereco" required placeholder="Rua, Número, Bairro..." style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box;">
+                <input type="text" id="novo-endereco" required placeholder="Rua, Número, Bairro..." style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8125rem; outline: none; width: 100%; box-sizing: border-box;">
             </div>
 
             <div class="form-grupo">
                 <label for="novo-vagas">Capacidade de Vagas:</label>
-                <input type="number" id="novo-vagas" min="1" value="10" style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; outline: none; width: 100%; box-sizing: border-box;">
+                <input type="number" id="novo-vagas" min="1" value="10" style="padding: 7px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8125rem; outline: none; width: 100%; box-sizing: border-box;">
             </div>
 
             <div class="checkbox-group" style="margin-top: 2px;">
@@ -158,16 +158,16 @@
 
 <!-- Botão Tema Dia/Noite (Canto Superior Direito) -->
 <div style="position: absolute; top: 15px; right: 10px; z-index: 1000;">
-    <button onclick="alternarTema()" id="btn-tema" title="Alternar Modo Claro/Escuro" style="background-color: #2e7d32; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+    <button onclick="alternarTema()" id="btn-tema" title="Alternar Modo Claro/Escuro" style="background-color: #2e7d32; color: white; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 1rem; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
         <i class="fa-solid fa-moon" id="icone-tema"></i>
     </button>
 </div>
 
 <!-- Seletor de Tamanho de Fonte Compacto e Esguio (Canto Superior Direito) -->
 <div class="seletor-fonte">
-    <button class="btn-fonte" onclick="mudarTamanhoFonte('normal')" title="Fonte Normal" style="font-size: 11px;">A</button>
-    <button class="btn-fonte" onclick="mudarTamanhoFonte('grande')" title="Fonte Grande" style="font-size: 13px;">A+</button>
-    <button class="btn-fonte" onclick="mudarTamanhoFonte('muito-grande')" title="Fonte Muito Grande" style="font-size: 15px;">A++</button>
+    <button class="btn-fonte" onclick="mudarTamanhoFonte('normal')" title="Fonte Normal" style="font-size: 0.6875rem;">A</button>
+    <button class="btn-fonte" onclick="mudarTamanhoFonte('grande')" title="Fonte Grande" style="font-size: 0.8125rem;">A+</button>
+    <button class="btn-fonte" onclick="mudarTamanhoFonte('muito-grande')" title="Fonte Muito Grande" style="font-size: 0.9375rem;">A++</button>
 </div>
 <!-- Container do Mapa -->
 <div id="map"></div>
@@ -181,7 +181,12 @@
 
 <!-- Legenda Fixa na Base -->
 
-<div class="map-legend-bar">
+<div class="map-legend-bar" id="legenda-mapa">
+    <!-- Em telas muito estreitas (zoom de 200%) a legenda vira um botão que abre e fecha -->
+    <button type="button" id="btn-legenda" class="btn-legenda" aria-expanded="false" aria-controls="itens-legenda">
+        <i class="fa-solid fa-circle-info" aria-hidden="true"></i> Legenda
+    </button>
+    <div id="itens-legenda" class="itens-legenda">
     <div class="legend-item">
         <div class="legend-pin-mini" style="background-color: #2e7d32;"><i class="fa-solid fa-bicycle"></i></div>
         <span>Bicicletário</span>
@@ -202,6 +207,7 @@
         <div class="legend-pin-mini legenda-alerta-vermelho"><i class="fa-solid fa-ban"></i></div>
         <span>Crítico: fechado ou lotado</span>
     </div>
+    </div>
 </div>
 
 <!-- Leaflet JS -->
@@ -221,21 +227,21 @@
             <input type="hidden" id="edit-ponto-id">
 
             <div class="form-grupo">
-                <label for="edit-vagas" style="font-weight: 600; font-size: 13px;">Capacidade de Vagas:</label>
-                <input type="number" id="edit-vagas" min="0" required style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; width: 100%; box-sizing: border-box;">
+                <label for="edit-vagas" style="font-weight: 600; font-size: 0.8125rem;">Capacidade de Vagas:</label>
+                <input type="number" id="edit-vagas" min="0" required style="padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.8125rem; width: 100%; box-sizing: border-box;">
             </div>
 
             <div class="checkbox-group" style="display: flex; flex-direction: column; gap: 6px; margin-top: 5px;">
-                <label style="font-size: 13px; cursor: pointer;"><input type="checkbox" id="edit-gratuito"> Gratuito</label>
-                <label style="font-size: 13px; cursor: pointer;"><input type="checkbox" id="edit-coberto"> Coberto</label>
+                <label style="font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" id="edit-gratuito"> Gratuito</label>
+                <label style="font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" id="edit-coberto"> Coberto</label>
             </div>
 
             <hr style="border: 0; border-top: 1px solid #eee; margin: 5px 0;">
 
-            <label style="font-weight: 600; font-size: 13px; color: #333;"><i class="fa-solid fa-shield"></i> Segurança:</label>
+            <label style="font-weight: 600; font-size: 0.8125rem; color: #333;"><i class="fa-solid fa-shield"></i> Segurança:</label>
             <div class="checkbox-group" style="display: flex; flex-direction: column; gap: 6px;">
-                <label style="font-size: 13px; cursor: pointer;"><input type="checkbox" id="edit-vigilancia"> Vigilância Humana</label>
-                <label style="font-size: 13px; cursor: pointer;"><input type="checkbox" id="edit-cameras"> Câmera de Monitoramento</label>
+                <label style="font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" id="edit-vigilancia"> Vigilância Humana</label>
+                <label style="font-size: 0.8125rem; cursor: pointer;"><input type="checkbox" id="edit-cameras"> Câmera de Monitoramento</label>
             </div>
 
             <!-- Botões Salvar e Cancelar -->
@@ -278,7 +284,7 @@
             <div class="form-grupo">
                 <label for="ocorrencia-descricao">Descrição:</label>
                 <textarea id="ocorrencia-descricao" rows="4" maxlength="1000" required placeholder="Descreva o problema ou situação..."></textarea>
-                <div id="contador-caracteres" style="font-size: 11px; color: #666; text-align: right; margin-top: 2px;">0/1000</div>
+                <div id="contador-caracteres" style="font-size: 0.6875rem; color: #666; text-align: right; margin-top: 2px;">0/1000</div>
             </div>
 
             <button type="submit" class="btn-salvar">Salvar Ocorrência</button>
@@ -291,10 +297,10 @@
     <div class="modal-conteudo">
         <span class="fechar-modal" onclick="fecharModalDetalhe()">&times;</span>
         <h2 id="detalhe-tipo" style="color: #d32f2f; margin-bottom: 4px;">Tipo de Ocorrência</h2>
-        <p style="font-size: 12px; color: #666; margin-bottom: 12px;"><i class="fa-regular fa-clock"></i> <span id="detalhe-data"></span></p>
+        <p style="font-size: 0.75rem; color: #666; margin-bottom: 12px;"><i class="fa-regular fa-clock"></i> <span id="detalhe-data"></span></p>
         <div class="form-grupo">
             <label>Descrição:</label>
-            <p id="detalhe-descricao" style="background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #ddd; max-height: 150px; overflow-y: auto; font-size: 14px; color: #333; word-break: break-word;"></p>
+            <p id="detalhe-descricao" style="background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #ddd; max-height: 150px; overflow-y: auto; font-size: 0.875rem; color: #333; word-break: break-word;"></p>
         </div>
     </div>
 </div>
