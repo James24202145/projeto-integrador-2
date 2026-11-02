@@ -34,6 +34,10 @@ const OCORRENCIAS_ALERTA_AMARELO = ['Vandalismo', 'Avaria/Estrutura Danificada',
 const COR_ALERTA_VERMELHO = '#d32f2f';
 const COR_ALERTA_AMARELO = '#fbc02d';
 
+// Além da cor, cada alerta tem um selo com símbolo e um texto (a informação não depende só da cor)
+const ALERTA_VERMELHO = { classeCor: 'pin-alerta-vermelho', classeSelo: 'pin-selo-vermelho', iconeSelo: 'fa-ban', rotulo: 'Crítico' };
+const ALERTA_AMARELO = { classeCor: 'pin-alerta-amarelo', classeSelo: 'pin-selo-amarelo', iconeSelo: 'fa-exclamation', rotulo: 'Atenção' };
+
 // Exibido na ficha do ponto e no formulário de ocorrência (o mesmo texto está no index.html)
 const AVISO_SEGURANCA_USO = 'Consulte e registre ocorrências com a bicicleta parada. Durante o trajeto, siga a navegação por voz do Google Maps.';
 
@@ -429,30 +433,47 @@ function inicializarMapa() {
     camadaMarcadores = L.layerGroup().addTo(map);
 }
 
+// Alerta do ponto de acordo com a última ocorrência (null quando não há alerta)
+function obterAlerta(ultimaOcorrencia) {
+    if (OCORRENCIAS_ALERTA_VERMELHO.includes(ultimaOcorrencia)) return ALERTA_VERMELHO;
+    if (OCORRENCIAS_ALERTA_AMARELO.includes(ultimaOcorrencia)) return ALERTA_AMARELO;
+    return null;
+}
+
 // Cria o ícone L.divIcon com base no tipo e na última ocorrência
 function obterIconePersonalizado(tipo, ultimaOcorrencia) {
     const estilo = ESTILO_PIN_POR_TIPO[tipo] || ESTILO_PIN_PADRAO;
-    let classeCor = estilo.classeCor;
-
-    if (OCORRENCIAS_ALERTA_VERMELHO.includes(ultimaOcorrencia)) {
-        classeCor = 'pin-alerta-vermelho';
-    } else if (OCORRENCIAS_ALERTA_AMARELO.includes(ultimaOcorrencia)) {
-        classeCor = 'pin-alerta-amarelo';
-    }
+    const alerta = obterAlerta(ultimaOcorrencia);
+    const classeCor = alerta ? alerta.classeCor : estilo.classeCor;
+    const selo = alerta
+        ? `<span class="pin-selo ${alerta.classeSelo}"><i class="fa-solid ${alerta.iconeSelo}"></i></span>`
+        : '';
 
     return L.divIcon({
         className: 'custom-pin-wrapper',
-        html: `<div class="custom-pin ${classeCor}"><i class="fa-solid ${estilo.iconeFa}"></i></div>`,
+        html: `<div class="custom-pin ${classeCor}"><i class="fa-solid ${estilo.iconeFa}"></i></div>${selo}`,
         iconSize: [34, 34],
         iconAnchor: [17, 34],
         popupAnchor: [0, -34]
     });
 }
 
+function montarAlertaPopupHtml(ultimaOcorrencia) {
+    const alerta = obterAlerta(ultimaOcorrencia);
+    if (!alerta) return '';
+
+    return `
+            <p class="popup-alerta ${alerta.classeSelo}">
+                <i class="fa-solid ${alerta.iconeSelo}" aria-hidden="true"></i>
+                <span><strong>${alerta.rotulo}:</strong> última ocorrência registrada foi "${ultimaOcorrencia}".</span>
+            </p>`;
+}
+
 function montarPopupHtml(ponto, idPonto) {
     return `
         <div class="popup-content">
             <span class="popup-tag">${ponto.tipo}</span>
+            ${montarAlertaPopupHtml(ponto.ultima_ocorrencia_tipo)}
 
             <!-- Cabeçalho com Título e Botão de Rota do Google Maps -->
             <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px;">
@@ -541,7 +562,9 @@ function renderizarPontos(pontos) {
 
     pontos.forEach(ponto => {
         const icone = obterIconePersonalizado(ponto.tipo, ponto.ultima_ocorrencia_tipo);
-        const marker = L.marker([ponto.latitude, ponto.longitude], { icon: icone });
+        const alerta = obterAlerta(ponto.ultima_ocorrencia_tipo);
+        const titulo = alerta ? `${ponto.nome} (${alerta.rotulo}: ${ponto.ultima_ocorrencia_tipo})` : ponto.nome;
+        const marker = L.marker([ponto.latitude, ponto.longitude], { icon: icone, title: titulo });
         const idPonto = ponto.id_ponto || ponto.id;
 
         marker.bindPopup(montarPopupHtml(ponto, idPonto));

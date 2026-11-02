@@ -97,6 +97,72 @@
     }
 }
 
+/* Selo dos pins com alerta: símbolo além da cor (amarelo = !, vermelho = proibido) */
+.pin-selo {
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    border: 2px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    pointer-events: none;
+}
+
+.pin-selo-amarelo {
+    border-color: #f9a825;
+    color: #4e342e;
+}
+
+.pin-selo-vermelho {
+    border-color: #d32f2f;
+    color: #b71c1c;
+}
+
+/* Explicação do alerta dentro da ficha do ponto */
+.popup-alerta {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border-left: 4px solid;
+    font-size: 12px;
+}
+
+.popup-alerta.pin-selo-amarelo {
+    background-color: #fff8e1;
+}
+
+.popup-alerta.pin-selo-vermelho {
+    background-color: #ffebee;
+}
+
+body.dark-mode .popup-alerta.pin-selo-amarelo {
+    background-color: #3e3200;
+    color: #ffe082 !important;
+}
+
+body.dark-mode .popup-alerta.pin-selo-vermelho {
+    background-color: #3b1214;
+    color: #ef9a9a !important;
+}
+
+/* Itens de alerta da legenda */
+.map-legend-bar .legenda-alerta-amarelo {
+    background-color: #fbc02d;
+    color: #4e342e;
+}
+
+.map-legend-bar .legenda-alerta-vermelho {
+    background-color: #d32f2f;
+}
+
 /* Aviso de segurança de uso (ficha do ponto e formulário de ocorrência) */
 .aviso-seguranca-uso {
     display: flex;
@@ -717,6 +783,7 @@ body.dark-mode div[style*="background: #ffffff;"] button:hover {
         left: 10px;
         right: 10px;
         justify-content: space-around;
+        flex-wrap: wrap;
         padding: 6px 8px;
         gap: 5px;
     }
